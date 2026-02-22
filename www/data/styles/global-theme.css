@@ -9,6 +9,7 @@
     --border-color: #e5e5ea;
     --button-secondary-bg: #e4e6eb;
     --button-secondary-text: #000000;
+    --font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
 /* Dark Mode */
@@ -69,6 +70,7 @@ body.dark-mode .group-item:active {
 body {
     background-color: #000000;
     color: var(--text-color);
+    font-family: var(--font-family) !important;
     transition: background-color 0.3s, color 0.3s;
 }
 

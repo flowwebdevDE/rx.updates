@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.3.5';
+    const APP_VERSION = '3.3.6';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -14,6 +14,9 @@
     const ACCENT_KEY = 'rx_accent';
     const USERNAME_KEY = 'rx_username';
     const DEPTH_KEY = 'rx_3d_depth';
+    const WALLPAPER_KEY = 'rx_custom_wallpaper';
+    const RADIUS_KEY = 'rx_custom_radius';
+    const FONT_KEY = 'rx_custom_font';
 
     function applySettings() {
         const isTablet = window.innerWidth >= 768;
@@ -31,6 +34,9 @@
         const launcherEnabled = localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true'; // Standard: aus
         const accent = localStorage.getItem(ACCENT_KEY) || 'blue';
         const depth = parseInt(localStorage.getItem(DEPTH_KEY) || '0');
+        const customWallpaper = localStorage.getItem(WALLPAPER_KEY);
+        const customRadius = localStorage.getItem(RADIUS_KEY);
+        const customFont = localStorage.getItem(FONT_KEY);
 
         // Wenn Pink Mode an ist, überschreibt er das Design
         if (pinkMode) {
@@ -70,6 +76,35 @@
             body.classList.add('enable-3d-effect');
         } else {
             body.classList.remove('enable-3d-effect');
+        }
+
+        // Custom Radius
+        if (customRadius) {
+            body.style.setProperty('--card-radius', customRadius + 'px');
+        } else {
+            body.style.removeProperty('--card-radius');
+        }
+
+        // Custom Font
+        if (customFont) {
+            body.style.setProperty('--font-family', customFont);
+        } else {
+            body.style.removeProperty('--font-family');
+        }
+
+        // Custom Wallpaper
+        const appEl = document.querySelector('.app');
+        if (appEl && customWallpaper) {
+            appEl.style.backgroundImage = `url('${customWallpaper}')`;
+            appEl.style.backgroundSize = 'cover';
+            appEl.style.backgroundPosition = 'center';
+            appEl.style.backgroundAttachment = 'fixed';
+        } else if (appEl && !customWallpaper) {
+            // Reset inline styles to allow theme defaults
+            appEl.style.backgroundImage = '';
+            appEl.style.backgroundSize = '';
+            appEl.style.backgroundPosition = '';
+            appEl.style.backgroundAttachment = '';
         }
 
         // Tablet Theme CSS Injection
@@ -216,7 +251,7 @@
 
         // Event feuern für UI-Updates (z.B. in index.html)
         window.dispatchEvent(new CustomEvent('rx-settings-changed', { 
-            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth } 
+            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth, customRadius, customFont, customWallpaper } 
         }));
 
         updateDevTrigger(devMode);
@@ -261,6 +296,22 @@
 
     window.set3DDepth = function(value) {
         localStorage.setItem(DEPTH_KEY, value);
+        applySettings();
+    };
+
+    window.setCustomRadius = function(value) {
+        localStorage.setItem(RADIUS_KEY, value);
+        applySettings();
+    };
+
+    window.setCustomFont = function(value) {
+        localStorage.setItem(FONT_KEY, value);
+        applySettings();
+    };
+
+    window.setCustomWallpaper = function(dataUrl) {
+        if(dataUrl) localStorage.setItem(WALLPAPER_KEY, dataUrl);
+        else localStorage.removeItem(WALLPAPER_KEY);
         applySettings();
     };
 
@@ -371,7 +422,10 @@
             launcherApps: JSON.parse(localStorage.getItem(LAUNCHER_APPS_KEY) || '[]'),
             accent: localStorage.getItem(ACCENT_KEY) || 'blue',
             username: localStorage.getItem(USERNAME_KEY) || '',
-            depth: parseInt(localStorage.getItem(DEPTH_KEY) || '0')
+            depth: parseInt(localStorage.getItem(DEPTH_KEY) || '0'),
+            customRadius: localStorage.getItem(RADIUS_KEY),
+            customFont: localStorage.getItem(FONT_KEY),
+            customWallpaper: localStorage.getItem(WALLPAPER_KEY)
         };
     };
 
