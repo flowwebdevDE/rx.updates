@@ -342,6 +342,116 @@ body.design-bubble .settings-item.is-button:active {
     transform: scale(0.92);
 }
 
+/* 8. 3D Theme (Neo-Brutalism / Hard 3D) */
+body.design-3d {
+    --card-radius: 12px;
+    --background-color: #e0e7ff;
+    --card-background: #ffffff;
+    --border-color: #000000;
+    --text-color: #000000;
+    --secondary-text-color: #444444;
+}
+body.design-3d.dark-mode {
+    --background-color: #121212;
+    --card-background: #2a2a2a;
+    --border-color: #ffffff;
+    --text-color: #ffffff;
+    --secondary-text-color: #cccccc;
+}
+
+body.design-3d .app {
+    background-color: var(--background-color);
+    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+    background-size: 20px 20px; /* Dot pattern */
+}
+
+body.design-3d .header {
+    background: var(--card-background) !important;
+    border-bottom: 3px solid var(--border-color);
+    box-shadow: 0 4px 0 var(--border-color);
+    margin-bottom: 20px;
+    z-index: 100;
+}
+
+body.design-3d .card,
+body.design-3d .nav-card,
+body.design-3d .popup-card,
+body.design-3d .settings-group,
+body.design-3d .weather-main-card,
+body.design-3d #popup,
+body.design-3d #mode-popup,
+body.design-3d .control-center-grid,
+body.design-3d .search-overlay,
+body.design-3d .popup-content,
+body.design-3d .options-card,
+body.design-3d .login-card {
+    border: 3px solid var(--border-color) !important;
+    box-shadow: 6px 6px 0px var(--border-color) !important;
+    transform: translate(-3px, -3px);
+    transition: transform 0.1s, box-shadow 0.1s;
+    border-radius: var(--card-radius) !important;
+}
+
+/* Active State (Pressed) */
+body.design-3d .nav-card:active,
+body.design-3d .card:active,
+body.design-3d button:active,
+body.design-3d .btn-primary:active,
+body.design-3d .btn-secondary:active,
+body.design-3d .form-btn:active,
+body.design-3d .cc-button:active,
+body.design-3d .settings-item.is-button:active {
+    transform: translate(0, 0);
+    box-shadow: 0px 0px 0px var(--border-color) !important;
+}
+
+/* Inputs */
+body.design-3d input, 
+body.design-3d select, 
+body.design-3d textarea {
+    border: 3px solid var(--border-color) !important;
+    box-shadow: 4px 4px 0px var(--border-color);
+    background: var(--card-background) !important;
+    border-radius: 8px !important;
+}
+body.design-3d input:focus,
+body.design-3d select:focus {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--border-color);
+}
+
+/* Buttons */
+body.design-3d button,
+body.design-3d .btn-primary,
+body.design-3d .btn-secondary,
+body.design-3d .form-btn,
+body.design-3d .cc-button {
+    border: 3px solid var(--border-color) !important;
+    box-shadow: 4px 4px 0px var(--border-color);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Icons */
+body.design-3d .icon-box {
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0 var(--border-color);
+}
+
+/* Switches */
+body.design-3d .switch .slider {
+    border: 2px solid var(--border-color);
+}
+body.design-3d .switch input:checked + .slider {
+    background-color: var(--accent-color);
+}
+body.design-3d .switch .slider:before {
+    border: 2px solid var(--border-color);
+    bottom: 0px; left: 0px;
+    box-shadow: none;
+}
+
 /* 5. Tablet Layout (Sidebar Redesign) */
 body.design-tablet {
     --sidebar-width: 320px;

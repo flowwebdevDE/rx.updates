@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.3.4';
+    const APP_VERSION = '3.3.5';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -37,7 +37,7 @@
 
         const body = document.body;
         // Alte Design-Klassen entfernen
-        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet', 'design-glass', 'design-bubble');
+        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet', 'design-glass', 'design-bubble', 'design-3d');
         // Neues Design setzen
         if (!body.classList.contains('no-layout-change') || design === 'pink' || design === 'tablet') {
             body.classList.add('design-' + design);

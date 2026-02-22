@@ -303,6 +303,7 @@
             <div class="selection-item" onclick="selectDesign('focus')" id="btn-focus">Fokus</div>
             <div class="selection-item" onclick="selectDesign('glass')" id="btn-glass">Glass</div>
             <div class="selection-item" onclick="selectDesign('bubble')" id="btn-bubble">Bubble</div>
+            <div class="selection-item" onclick="selectDesign('3d')" id="btn-3d">3D</div>
             <div class="selection-item" onclick="selectDesign('tablet')" id="btn-tablet" style="grid-column: 1 / -1;">Tablet (Breit)</div>
         </div>
     </div>
@@ -424,7 +425,7 @@
             if(btn) btn.classList.add('active');
             
             // Update Preview Text
-            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet', 'glass': 'Glass', 'bubble': 'Bubble' };
+            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet', 'glass': 'Glass', 'bubble': 'Bubble', '3d': '3D' };
             const preview = document.getElementById('layout-preview');
             if(preview) preview.textContent = map[design] || 'Standard';
 
