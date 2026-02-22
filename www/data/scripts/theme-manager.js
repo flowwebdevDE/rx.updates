@@ -329,7 +329,7 @@ Pixel Ratio: ${window.devicePixelRatio}`;
         // Die URL muss auf eine version.json zeigen.
         // Für Plugin-Updates muss 'url' im JSON auf eine ZIP-Datei mit dem 'www'-Ordner zeigen!
         const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
-        const CURRENT_VERSION = '3.2.0'; 
+        const CURRENT_VERSION = '3.2.2'; 
         
         if(btnText) btnText.textContent = 'Prüfe...';
 
