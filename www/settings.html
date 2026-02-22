@@ -153,6 +153,14 @@
                     </div>
                     <label class="switch"><input type="checkbox" id="weather-toggle"><span class="slider"></span></label>
                 </div>
+                <div class="settings-divider"></div>
+                <div class="settings-item">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="settings-label">Benachrichtigungen</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="notifications-toggle"><span class="slider"></span></label>
+                </div>
             </div>
 
             <h3>Design</h3>
@@ -311,6 +319,7 @@
         setChecked('pinkmode-toggle', settings.pinkMode);
         setChecked('location-toggle', settings.locationEnabled);
         setChecked('weather-toggle', settings.weatherEnabled);
+        setChecked('notifications-toggle', settings.notificationsEnabled);
         setValue('username-input', settings.username);
         
         // Dev Mode Initial State
@@ -328,6 +337,7 @@
         addListener('pinkmode-toggle', 'change', (e) => setPinkMode(e.target.checked));
         addListener('location-toggle', 'change', (e) => setFeature('location', e.target.checked));
         addListener('weather-toggle', 'change', (e) => setFeature('weather', e.target.checked));
+        addListener('notifications-toggle', 'change', (e) => setFeature('notifications', e.target.checked));
         addListener('username-input', 'input', (e) => setUsername(e.target.value));
 
         // Popup Logic

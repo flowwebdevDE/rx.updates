@@ -111,8 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Custom Popup Logic ---
     function showPopup(msg) {
-        popupMessage.textContent = msg;
-        customPopupOverlay.classList.remove('hidden');
+        if (window.showNotification) {
+            window.showNotification('Info', msg);
+        } else {
+            popupMessage.textContent = msg;
+            customPopupOverlay.classList.remove('hidden');
+        }
     }
 
     popupCloseBtn.addEventListener('click', () => {

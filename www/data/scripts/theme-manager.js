@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.2.4';
+    const APP_VERSION = '3.2.5';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -7,6 +7,7 @@
     const DEV_MODE_KEY = 'rx_dev_mode';
     const FEAT_WEATHER_KEY = 'rx_feat_weather';
     const FEAT_LOCATION_KEY = 'rx_feat_location';
+    const FEAT_NOTIFICATIONS_KEY = 'rx_feat_notifications';
     const FEAT_LAUNCHER_KEY = 'rx_feat_launcher';
     const LAUNCHER_CONFIG_KEY = 'rx_launcher_config';
     const LAUNCHER_APPS_KEY = 'rx_launcher_apps';
@@ -25,6 +26,7 @@
         const devMode = localStorage.getItem(DEV_MODE_KEY) === 'true';
         const weatherEnabled = localStorage.getItem(FEAT_WEATHER_KEY) !== 'false'; // Standard: an
         const locationEnabled = localStorage.getItem(FEAT_LOCATION_KEY) !== 'false'; // Standard: an
+        const notificationsEnabled = localStorage.getItem(FEAT_NOTIFICATIONS_KEY) !== 'false'; // Standard: an
         const launcherEnabled = localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true'; // Standard: aus
         const accent = localStorage.getItem(ACCENT_KEY) || 'blue';
 
@@ -204,7 +206,7 @@
 
         // Event feuern für UI-Updates (z.B. in index.html)
         window.dispatchEvent(new CustomEvent('rx-settings-changed', { 
-            detail: { design, darkMode, weatherEnabled, locationEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode } 
+            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode } 
         }));
 
         updateDevTrigger(devMode);
@@ -237,6 +239,7 @@
     window.setFeature = function(feature, enable) {
         if (feature === 'weather') localStorage.setItem(FEAT_WEATHER_KEY, enable);
         if (feature === 'location') localStorage.setItem(FEAT_LOCATION_KEY, enable);
+        if (feature === 'notifications') localStorage.setItem(FEAT_NOTIFICATIONS_KEY, enable);
         if (feature === 'launcher') localStorage.setItem(FEAT_LAUNCHER_KEY, enable);
         applySettings();
     };
@@ -322,6 +325,7 @@
             devMode: localStorage.getItem(DEV_MODE_KEY) === 'true',
             weatherEnabled: localStorage.getItem(FEAT_WEATHER_KEY) !== 'false',
             locationEnabled: localStorage.getItem(FEAT_LOCATION_KEY) !== 'false',
+            notificationsEnabled: localStorage.getItem(FEAT_NOTIFICATIONS_KEY) !== 'false',
             launcherEnabled: localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true',
             launcherApps: JSON.parse(localStorage.getItem(LAUNCHER_APPS_KEY) || '[]'),
             accent: localStorage.getItem(ACCENT_KEY) || 'blue',
@@ -435,8 +439,10 @@
                     if(confirm(`Update verfügbar: ${data.version}\n\nInstallieren?`)) performUpdate();
                 }
             } else {
-                if (window.showAppPopup) {
-                    window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`);
+                if (window.showNotification) {
+                    window.showNotification('System', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`, null);
+                } else if (window.showAppPopup) {
+                     window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`);
                 }
             }
         } catch (e) {
@@ -473,6 +479,9 @@
     // STATUS BAR NOTIFICATION
     // =========================================
     window.showNotification = function(title, message, icon, duration = 4000) {
+        // Prüfen ob Benachrichtigungen aktiviert sind
+        if (!window.getSettings().notificationsEnabled) return;
+
         let notif = document.getElementById('status-notification');
         
         // Erstellen falls nicht vorhanden

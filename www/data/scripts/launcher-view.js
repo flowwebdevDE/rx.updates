@@ -1427,7 +1427,11 @@ function addToHomeScreen(app) {
     
     // Check duplicate
     if (currentApps.find(a => a.packageName === app.packageName)) {
-        alert('App ist bereits auf dem Home Screen');
+        if (window.showNotification) {
+            window.showNotification('Hinweis', 'App ist bereits auf dem Home Screen');
+        } else {
+            alert('App ist bereits auf dem Home Screen');
+        }
         return;
     }
     
