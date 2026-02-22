@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.3.1';
+    const APP_VERSION = '3.3.2';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';

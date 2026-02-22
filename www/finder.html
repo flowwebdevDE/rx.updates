@@ -749,6 +749,14 @@
                     startGeoTracking();
                 }
             }
+            
+            // Check for query param from Global Search
+            const urlParams = new URLSearchParams(window.location.search);
+            const q = urlParams.get('q');
+            if (q) {
+                searchInput.value = q;
+                handleSearch({ target: searchInput });
+            }
         }, 50);
 
         searchInput.addEventListener('input', debounce(handleSearch));
