@@ -397,6 +397,20 @@
                             if(btnText) btnText.textContent = 'Installiere...';
                             try {
                                 await CapacitorUpdater.set(version);
+                                
+                                // CLEANUP: Alte Versionen löschen, um Speicher zu sparen
+                                try {
+                                    const list = await CapacitorUpdater.list();
+                                    if (list.versions) {
+                                        for (const v of list.versions) {
+                                            // Lösche alles, was nicht die neue Version ist
+                                            if (v.id !== version.id) {
+                                                console.log('Bereinige alte Version:', v.id);
+                                                await CapacitorUpdater.delete({ id: v.id }).catch(() => {});
+                                            }
+                                        }
+                                    }
+                                } catch (e) { console.warn('Cleanup warning:', e); }
                             } catch (setErr) {
                                 // Häufiger Fehler: ZIP-Struktur falsch -> Plugin löscht das Bundle sofort
                                 if (setErr.message && setErr.message.includes('does not exist')) {
@@ -519,6 +533,28 @@
         if (window.notifTimeout) clearTimeout(window.notifTimeout);
         if (duration > 0) {
             window.notifTimeout = setTimeout(() => notif.classList.remove('visible'), duration);
+        }
+    };
+
+    window.resetUpdates = async function() {
+        const CapacitorUpdater = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
+        if (!CapacitorUpdater) return;
+        
+        const msg = 'Möchtest du alle heruntergeladenen Updates löschen und auf die Original-Version der App zurücksetzen? Dies gibt Speicherplatz frei.';
+        const doReset = async () => {
+            try {
+                await CapacitorUpdater.reset();
+                window.location.reload();
+            } catch(e) {
+                if (window.showAppPopup) window.showAppPopup('Fehler', e.message);
+                else alert(e.message);
+            }
+        };
+
+        if (window.showAppPopup) {
+            window.showAppPopup('Updates zurücksetzen', msg, 'Speicher freigeben', doReset);
+        } else if (confirm(msg)) {
+            doReset();
         }
     };
 
