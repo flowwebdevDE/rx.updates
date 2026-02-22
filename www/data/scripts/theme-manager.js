@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.2.3';
+    const APP_VERSION = '3.2.4';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -468,6 +468,50 @@
             el.textContent = APP_VERSION;
         });
     });
+
+    // =========================================
+    // STATUS BAR NOTIFICATION
+    // =========================================
+    window.showNotification = function(title, message, icon, duration = 4000) {
+        let notif = document.getElementById('status-notification');
+        
+        // Erstellen falls nicht vorhanden
+        if (!notif) {
+            notif = document.createElement('div');
+            notif.id = 'status-notification';
+            notif.innerHTML = `
+                <div class="sn-icon"></div>
+                <div class="sn-content">
+                    <div class="sn-title"></div>
+                    <div class="sn-message"></div>
+                </div>
+            `;
+            document.body.appendChild(notif);
+            
+            // Klick schließt die Benachrichtigung
+            notif.onclick = () => {
+                notif.classList.remove('visible');
+                if (window.notifTimeout) clearTimeout(window.notifTimeout);
+            };
+        }
+        
+        // Inhalt setzen
+        const iconEl = notif.querySelector('.sn-icon');
+        iconEl.innerHTML = icon || '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        notif.querySelector('.sn-title').textContent = title;
+        notif.querySelector('.sn-message').textContent = message;
+        
+        // Animation neu starten
+        notif.classList.remove('visible');
+        void notif.offsetWidth; // Trigger Reflow
+        notif.classList.add('visible');
+        
+        // Auto-Hide
+        if (window.notifTimeout) clearTimeout(window.notifTimeout);
+        if (duration > 0) {
+            window.notifTimeout = setTimeout(() => notif.classList.remove('visible'), duration);
+        }
+    };
 
     // =========================================
     // PAGE TRANSITION LOGIC

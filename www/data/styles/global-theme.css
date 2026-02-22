@@ -786,3 +786,60 @@ body.design-pink #accent-divider {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* =========================================
+   STATUS BAR NOTIFICATION (Dynamic Slide)
+   ========================================= */
+#status-notification {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #000000; /* Matcht die Statusbar */
+    color: white;
+    z-index: 20000; /* Über allem anderen */
+    padding: 45px 24px 20px 24px; /* Extra Padding oben für die Statusbar-Höhe */
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy Effekt */
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+}
+
+#status-notification.visible {
+    transform: translateY(0);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+#status-notification .sn-icon {
+    color: var(--accent-color);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+#status-notification .sn-icon svg { width: 28px; height: 28px; }
+
+#status-notification .sn-content {
+    flex: 1;
+}
+#status-notification .sn-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+#status-notification .sn-message {
+    font-size: 13px;
+    opacity: 0.8;
+    line-height: 1.3;
+}
+
+/* Pink Mode Override */
+body.design-pink #status-notification {
+    background: #880e4f;
+    color: #fce4ec;
+}
+body.design-pink #status-notification .sn-icon {
+    color: #fce4ec;
+}
