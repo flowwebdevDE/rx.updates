@@ -12,6 +12,47 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="theme-color" content="#000000">
+  <style>
+    /* Global Search Overlay */
+    .search-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(242, 242, 247, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: flex; flex-direction: column;
+        padding: 20px;
+        transform: translateY(-100%);
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        visibility: hidden;
+    }
+    body.dark-mode .search-overlay { background: rgba(0, 0, 0, 0.9); }
+    .search-overlay.open { transform: translateY(0); visibility: visible; }
+    
+    .search-bar-wrap {
+        display: flex; gap: 10px; align-items: center; margin-bottom: 20px; margin-top: env(safe-area-inset-top);
+    }
+    .search-input-container {
+        flex: 1; position: relative;
+    }
+    .search-input-container svg {
+        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+        color: var(--secondary-text-color); width: 18px; height: 18px;
+    }
+    #global-search {
+        width: 100%; padding: 12px 12px 12px 40px;
+        border-radius: 12px; border: none;
+        background: rgba(118, 118, 128, 0.12);
+        font-size: 17px; color: var(--text-color);
+        outline: none;
+    }
+    #search-cancel {
+        color: var(--accent-color); font-weight: 600; background: none; border: none; font-size: 17px; cursor: pointer;
+    }
+    .search-results {
+        flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+    }
+  </style>
 </head>
 <body>
   <!-- Startscreen / Splash Screen -->
@@ -22,6 +63,18 @@
       <div id="splash-progress" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 0.8s linear;"></div>
     </div>
     <p id="splash-greeting" style="margin-top: 20px; color: var(--accent-color); font-weight: 500; min-height: 20px;"></p>
+  </div>
+
+  <!-- Global Search Overlay -->
+  <div id="search-overlay" class="search-overlay">
+    <div class="search-bar-wrap">
+        <div class="search-input-container">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="global-search" placeholder="Suchen..." autocomplete="off">
+        </div>
+        <button id="search-cancel">Abbrechen</button>
+    </div>
+    <div id="search-results" class="search-results"></div>
   </div>
 
   <div class="app">
@@ -170,8 +223,81 @@
                 }
             });
         }
+
+        // --- Global Search Logic ---
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchInput = document.getElementById('global-search');
+        const searchCancel = document.getElementById('search-cancel');
+        const searchResults = document.getElementById('search-results');
+        let touchStartY = 0;
+
+        // Swipe Down Detection
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        document.addEventListener('touchmove', e => {
+            const touchY = e.touches[0].clientY;
+            const diff = touchY - touchStartY;
+            // Nur wenn ganz oben und nach unten gezogen wird
+            if (window.scrollY <= 0 && touchStartY < 150 && diff > 60) {
+                openSearch();
+            }
+        }, {passive: true});
+
+        function openSearch() {
+            searchOverlay.classList.add('open');
+            setTimeout(() => searchInput.focus(), 300);
+            renderSearchResults('');
+        }
+
+        function closeSearch() {
+            searchOverlay.classList.remove('open');
+            searchInput.blur();
+        }
+
+        searchCancel.addEventListener('click', closeSearch);
+
+        // Search Indexing
+        const cards = Array.from(document.querySelectorAll('.nav-card')).map(card => ({
+            title: card.querySelector('h3')?.textContent || '',
+            desc: card.querySelector('p')?.textContent || '',
+            href: card.getAttribute('href'),
+            icon: card.querySelector('.icon-box')?.innerHTML || ''
+        })).filter(item => item.href); // Nur Links
+
+        function renderSearchResults(term) {
+            const lower = term.toLowerCase();
+            const filtered = cards.filter(c => c.title.toLowerCase().includes(lower) || c.desc.toLowerCase().includes(lower));
+            
+            searchResults.innerHTML = '';
+            
+            if (filtered.length === 0 && term) {
+                searchResults.innerHTML = '<div style="text-align:center; color:var(--secondary-text-color); margin-top:20px;">Keine Ergebnisse</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'card nav-card'; // Reuse styles
+                div.style.flexDirection = 'row';
+                div.style.alignItems = 'center';
+                div.style.padding = '15px';
+                div.style.minHeight = 'auto';
+                div.innerHTML = `
+                    <div class="icon-box" style="margin-bottom:0; margin-right:15px; width:36px; height:36px;">${item.icon}</div>
+                    <div>
+                        <h3 style="margin:0; font-size:16px;">${item.title}</h3>
+                        <p style="margin:0; font-size:13px;">${item.desc}</p>
+                    </div>
+                `;
+                div.onclick = () => window.location.href = item.href;
+                searchResults.appendChild(div);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => renderSearchResults(e.target.value));
     });
   </script>
-  <script type="module" src="data/scripts/launcher-view.js"></script>
 </body>
 </html>

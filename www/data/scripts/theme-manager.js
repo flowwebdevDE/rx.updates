@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.3';
+    const APP_VERSION = '3.3.1';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -365,6 +365,20 @@
                     if (CapacitorUpdater && !isApk) {
                         console.log(`Starte Download von: ${data.url}`);
                         if(btnText) btnText.textContent = 'Lade...';
+                        
+                        // Initial Notification
+                        if (window.showNotification) {
+                            window.showNotification(
+                                'Update wird geladen', 
+                                'Starte Download...', 
+                                '<svg class="spinning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>',
+                                0,
+                                true
+                            );
+                        }
+                        
+                        let progressListener = null;
+
                         try {
                             // Sicherheits-Check: Ist der Link eine Webseite statt einer ZIP?
                             try {
@@ -378,12 +392,30 @@
                                 // Wir machen trotzdem weiter, falls es nur CORS war
                             }
 
+                            // Progress Listener registrieren
+                            try {
+                                progressListener = await CapacitorUpdater.addListener('download', (info) => {
+                                    if (window.showNotification && info.percent) {
+                                        window.showNotification(
+                                            'Update wird geladen', 
+                                            `Fortschritt: ${Math.round(info.percent)}%`, 
+                                            '<svg class="spinning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>',
+                                            0,
+                                            true,
+                                            info.percent
+                                        );
+                                    }
+                                });
+                            } catch(e) { console.warn('Progress listener failed', e); }
+
                             // 1. Download
                             const version = await CapacitorUpdater.download({
                                 url: data.url,
                                 version: data.version
                             });
                             console.log('Download abgeschlossen:', JSON.stringify(version));
+                            
+                            if (progressListener) progressListener.remove();
                             
                             // DEBUG: Prüfen, ob die Version wirklich da ist
                             const list = await CapacitorUpdater.list();
@@ -395,6 +427,17 @@
 
                             // 2. Installieren
                             if(btnText) btnText.textContent = 'Installiere...';
+                            
+                            if (window.showNotification) {
+                                window.showNotification(
+                                    'Installiere Update', 
+                                    'App wird neu gestartet...', 
+                                    '<svg class="spinning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>',
+                                    0,
+                                    true
+                                );
+                            }
+
                             try {
                                 await CapacitorUpdater.set(version);
                                 
@@ -424,6 +467,18 @@
                             
                         } catch(err) {
                             console.error(err);
+                            if (progressListener) progressListener.remove();
+                            
+                            if (window.showNotification) {
+                                window.showNotification(
+                                    'Update fehlgeschlagen', 
+                                    'Tippe für Details', 
+                                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+                                    4000,
+                                    true
+                                );
+                            }
+
                             // Fallback anbieten
                             const errorDetails = (err.message || JSON.stringify(err)).substring(0, 150);
                             const msg = `Der automatische Download ist fehlgeschlagen.\n\nGrund: ${errorDetails}\n\nMöchtest du die Datei manuell herunterladen?`;
@@ -454,7 +509,7 @@
                 }
             } else {
                 if (window.showNotification) {
-                    window.showNotification('System', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`, null);
+                    window.showNotification('System', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`, null, 4000, true);
                 } else if (window.showAppPopup) {
                      window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`);
                 }
@@ -492,11 +547,12 @@
     // =========================================
     // STATUS BAR NOTIFICATION
     // =========================================
-    window.showNotification = function(title, message, icon, duration = 4000) {
+    window.showNotification = function(title, message, icon, duration = 4000, force = false, progress = null) {
         // Prüfen ob Benachrichtigungen aktiviert sind
-        if (!window.getSettings().notificationsEnabled) return;
+        if (!force && !window.getSettings().notificationsEnabled) return;
 
         let notif = document.getElementById('status-notification');
+        let isUpdate = false;
         
         // Erstellen falls nicht vorhanden
         if (!notif) {
@@ -507,6 +563,9 @@
                 <div class="sn-content">
                     <div class="sn-title"></div>
                     <div class="sn-message"></div>
+                    <div class="sn-progress">
+                        <div class="sn-progress-bar"></div>
+                    </div>
                 </div>
             `;
             document.body.appendChild(notif);
@@ -516,6 +575,9 @@
                 notif.classList.remove('visible');
                 if (window.notifTimeout) clearTimeout(window.notifTimeout);
             };
+        } else {
+            // Prüfen ob sie schon sichtbar ist (um Animation zu vermeiden)
+            if (notif.classList.contains('visible')) isUpdate = true;
         }
         
         // Inhalt setzen
@@ -524,10 +586,22 @@
         notif.querySelector('.sn-title').textContent = title;
         notif.querySelector('.sn-message').textContent = message;
         
-        // Animation neu starten
-        notif.classList.remove('visible');
-        void notif.offsetWidth; // Trigger Reflow
-        notif.classList.add('visible');
+        // Progress Bar
+        const progContainer = notif.querySelector('.sn-progress');
+        const progBar = notif.querySelector('.sn-progress-bar');
+        if (progress !== null && progress >= 0) {
+            progContainer.style.display = 'block';
+            progBar.style.width = `${progress}%`;
+        } else {
+            progContainer.style.display = 'none';
+        }
+        
+        // Animation nur starten, wenn nicht schon sichtbar (verhindert Flackern bei Updates)
+        if (!isUpdate) {
+            notif.classList.remove('visible');
+            void notif.offsetWidth; // Trigger Reflow
+            notif.classList.add('visible');
+        }
         
         // Auto-Hide
         if (window.notifTimeout) clearTimeout(window.notifTimeout);

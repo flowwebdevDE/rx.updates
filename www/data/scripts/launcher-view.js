@@ -1208,6 +1208,10 @@ function setupSwipe(element, pageCount) {
         else if (diffY > 80 && Math.abs(diffY) > Math.abs(diffX)) {
             openAppDrawer();
         }
+        // Vertikal Swipe nach unten (Globale Suche)
+        else if (diffY < -80 && Math.abs(diffY) > Math.abs(diffX)) {
+            openGlobalSearch();
+        }
     }, {passive: true});
 }
 
@@ -1307,6 +1311,15 @@ function updateStationWidget() {
 }
 
 // --- App Drawer Logic ---
+
+function openGlobalSearch() {
+    openAppDrawer();
+    // Fokus auf Suchfeld setzen (mit kurzer Verzögerung für die Animation)
+    setTimeout(() => {
+        const searchInput = document.querySelector('#app-drawer .drawer-search');
+        if (searchInput) searchInput.focus();
+    }, 300);
+}
 
 async function openAppDrawer() {
     // Check if exists
