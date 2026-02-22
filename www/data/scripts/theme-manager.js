@@ -259,6 +259,23 @@
         window.dispatchEvent(new CustomEvent('rx-launcher-config-changed', { detail: config }));
     };
 
+    window.resetApp = function() {
+        if (confirm('Möchtest du die App wirklich zurücksetzen? Alle Einstellungen und Daten gehen verloren.')) {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload();
+        }
+    };
+
+    window.showDeviceInfo = function() {
+        const info = `
+User Agent: ${navigator.userAgent}
+Platform: ${navigator.platform}
+Screen: ${window.screen.width}x${window.screen.height}
+Pixel Ratio: ${window.devicePixelRatio}`;
+        alert(info);
+    };
+
     window.getLauncherConfig = function() {
         const defaultDock = [
              { label: 'Fahrplan', isInternal: true, type: 'timetable', action: 'main.html' },
