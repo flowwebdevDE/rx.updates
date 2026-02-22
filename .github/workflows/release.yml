@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*' # Triggert bei Tags wie v3.2.0
+  workflow_dispatch: # Ermöglicht manuelles Starten über GitHub
+    inputs:
+      version:
+        description: 'Version (z.B. v3.2.0)'
+        required: true
 
 jobs:
   build:
@@ -18,10 +23,11 @@ jobs:
       - name: Zip www folder
         run: |
           cd www
-          zip -r ../update.zip ./*
+          zip -r ../dist.zip ./*
 
       - name: Create Release & Upload Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: update.zip
+          tag_name: ${{ inputs.version || github.ref_name }}
+          files: dist.zip
           generate_release_notes: true
