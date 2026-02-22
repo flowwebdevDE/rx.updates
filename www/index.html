@@ -328,6 +328,10 @@
                 const res = await fetch('data/DE_stations.json');
                 const data = await res.json();
                 stationData = data.elements || [];
+                // Wenn Suche offen und leer ist, Vorschläge aktualisieren (damit Bahnhöfe erscheinen)
+                if (searchOverlay.classList.contains('open') && !searchInput.value) {
+                    renderSearchResults('');
+                }
             } catch (e) { console.warn('Failed to load stations for search', e); }
         }
 
@@ -338,6 +342,49 @@
             // Toggle Control Center / Results
             if (!lower) {
                 controlCenter.style.display = 'grid';
+                
+                // --- VORSCHLÄGE ---
+                const header = document.createElement('div');
+                header.textContent = 'Vorschläge';
+                header.style.cssText = 'padding: 0 5px; margin-bottom: 10px; font-size: 13px; font-weight: 600; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: 0.5px;';
+                searchResults.appendChild(header);
+
+                const suggestions = [
+                    { title: 'Fahrplan', desc: 'Verbindung suchen', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', action: () => window.location.href = 'main.html' },
+                    { title: 'Wetter', desc: 'Vorhersage', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><circle cx="12" cy="7" r="4"/></svg>', action: () => window.location.href = 'wetter/index.html' }
+                ];
+
+                // Dynamische Bahnhofs-Vorschläge (Zufällig aus großen Bahnhöfen)
+                if (stationData.length > 0) {
+                    // Versuche große Bahnhöfe zu finden (Kategorie 1 oder 2) oder nimm alle
+                    const major = stationData.filter(s => s.tags && (s.tags['railway:station_category'] === '1' || s.tags['railway:station_category'] === '2'));
+                    const pool = major.length > 0 ? major : stationData;
+                    
+                    // 2 Zufällige Bahnhöfe auswählen
+                    for(let i=0; i<2; i++) {
+                        const s = pool[Math.floor(Math.random() * pool.length)];
+                        if(s) {
+                            suggestions.push({
+                                title: s.tags.name,
+                                desc: 'Vorschlag • Bahnhof',
+                                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>',
+                                action: () => window.location.href = `finder.html?q=${encodeURIComponent(s.tags.name)}`
+                            });
+                        }
+                    }
+                }
+
+                suggestions.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'card nav-card';
+                    div.style.cssText = 'flex-direction: row; align-items: center; padding: 15px; min-height: auto; margin-bottom: 10px;';
+                    div.innerHTML = `
+                        <div class="icon-box" style="margin:0 15px 0 0; width:36px; height:36px; background:var(--button-secondary-bg); color:var(--text-color);">${s.icon}</div>
+                        <div><h3 style="margin:0; font-size:16px;">${s.title}</h3><p style="margin:0; font-size:13px;">${s.desc}</p></div>
+                    `;
+                    div.onclick = s.action;
+                    searchResults.appendChild(div);
+                });
                 return;
             }
             controlCenter.style.display = 'none';

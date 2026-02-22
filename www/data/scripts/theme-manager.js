@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.3.2';
+    const APP_VERSION = '3.3.3';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -37,14 +37,14 @@
 
         const body = document.body;
         // Alte Design-Klassen entfernen
-        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet');
+        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet', 'design-glass', 'design-bubble');
         // Neues Design setzen
         if (!body.classList.contains('no-layout-change') || design === 'pink' || design === 'tablet') {
             body.classList.add('design-' + design);
         }
 
         // Akzentfarbe setzen
-        body.classList.remove('accent-blue', 'accent-red', 'accent-green', 'accent-orange', 'accent-purple', 'accent-pink');
+        body.classList.remove('accent-blue', 'accent-red', 'accent-green', 'accent-orange', 'accent-purple', 'accent-pink', 'accent-teal', 'accent-yellow', 'accent-indigo', 'accent-brown');
         // Im Pink Mode wird die Akzentfarbe auf Pink gezwungen
         body.classList.add('accent-' + (pinkMode ? 'pink' : accent));
 
@@ -286,6 +286,32 @@
         } else {
             alert(info);
         }
+    };
+
+    window.testSplash = function() {
+        sessionStorage.removeItem('rx_greeted');
+        window.location.reload();
+    };
+
+    window.simulateUpdate = function() {
+        if (window.showNotification) {
+            window.showNotification('Update verfügbar', 'Version 9.9.9 ist verfügbar.\n\nNeuerungen:\n- Alles ist besser', null, 0, true);
+        }
+        if (window.showAppPopup) {
+            window.showAppPopup('Update verfügbar', 'Version 9.9.9 ist verfügbar.\n\nNeuerungen:\n- Alles ist besser', 'Jetzt aktualisieren', () => {
+                alert('Dies ist nur eine Simulation.');
+            });
+        }
+    };
+
+    window.showLocalStorage = function() {
+        let content = '';
+        for(let i=0; i<localStorage.length; i++) {
+            const key = localStorage.key(i);
+            content += `<b>${key}:</b><br><span style="font-family:monospace; font-size:12px; color:var(--secondary-text-color);">${localStorage.getItem(key)}</span><br><br>`;
+        }
+        if (window.showAppPopup) window.showAppPopup('LocalStorage', content || 'Leer');
+        else alert(content || 'Leer');
     };
 
     window.getLauncherConfig = function() {

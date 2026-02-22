@@ -227,10 +227,31 @@
                     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
                 <div class="settings-divider"></div>
+                <div class="settings-item is-button" onclick="showLocalStorage()">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span class="settings-label">Speicher inspizieren</span>
+                    </div>
+                </div>
+                <div class="settings-divider"></div>
                 <div class="settings-item is-button" onclick="showNotification('Test-Nachricht', 'Das ist eine Benachrichtigung von oben!', null)">
                     <div class="settings-label-wrap">
                         <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                         <span class="settings-label">Benachrichtigung testen</span>
+                    </div>
+                </div>
+                <div class="settings-divider"></div>
+                <div class="settings-item is-button" onclick="testSplash()">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span class="settings-label">Splash Screen testen</span>
+                    </div>
+                </div>
+                <div class="settings-divider"></div>
+                <div class="settings-item is-button" onclick="simulateUpdate()">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span class="settings-label">Update simulieren</span>
                     </div>
                 </div>
                 <div class="settings-divider"></div>
@@ -280,6 +301,8 @@
             <div class="selection-item" onclick="selectDesign('list')" id="btn-list">Liste</div>
             <div class="selection-item" onclick="selectDesign('tiles')" id="btn-tiles">Kacheln</div>
             <div class="selection-item" onclick="selectDesign('focus')" id="btn-focus">Fokus</div>
+            <div class="selection-item" onclick="selectDesign('glass')" id="btn-glass">Glass</div>
+            <div class="selection-item" onclick="selectDesign('bubble')" id="btn-bubble">Bubble</div>
             <div class="selection-item" onclick="selectDesign('tablet')" id="btn-tablet" style="grid-column: 1 / -1;">Tablet (Breit)</div>
         </div>
     </div>
@@ -290,13 +313,17 @@
             <h2 class="popup-title">Akzentfarbe</h2>
             <button class="popup-close" onclick="closeAllPopups()">✕</button>
         </div>
-        <div class="selection-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="selection-grid" style="grid-template-columns: repeat(4, 1fr);">
             <div class="selection-item" onclick="selectAccent('blue')" id="acc-blue"><span class="color-dot" style="background:#0a3d91"></span>Blau</div>
             <div class="selection-item" onclick="selectAccent('red')" id="acc-red"><span class="color-dot" style="background:#ec0016"></span>Rot</div>
             <div class="selection-item" onclick="selectAccent('green')" id="acc-green"><span class="color-dot" style="background:#27ae60"></span>Grün</div>
             <div class="selection-item" onclick="selectAccent('orange')" id="acc-orange"><span class="color-dot" style="background:#e67e22"></span>Orange</div>
             <div class="selection-item" onclick="selectAccent('purple')" id="acc-purple"><span class="color-dot" style="background:#8e44ad"></span>Lila</div>
             <div class="selection-item" onclick="selectAccent('pink')" id="acc-pink"><span class="color-dot" style="background:#e91e63"></span>Pink</div>
+            <div class="selection-item" onclick="selectAccent('teal')" id="acc-teal"><span class="color-dot" style="background:#009688"></span>Türkis</div>
+            <div class="selection-item" onclick="selectAccent('yellow')" id="acc-yellow"><span class="color-dot" style="background:#fbc02d"></span>Gelb</div>
+            <div class="selection-item" onclick="selectAccent('indigo')" id="acc-indigo"><span class="color-dot" style="background:#3f51b5"></span>Indigo</div>
+            <div class="selection-item" onclick="selectAccent('brown')" id="acc-brown"><span class="color-dot" style="background:#795548"></span>Braun</div>
         </div>
     </div>
 
@@ -397,7 +424,7 @@
             if(btn) btn.classList.add('active');
             
             // Update Preview Text
-            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet' };
+            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet', 'glass': 'Glass', 'bubble': 'Bubble' };
             const preview = document.getElementById('layout-preview');
             if(preview) preview.textContent = map[design] || 'Standard';
 
@@ -422,7 +449,7 @@
             if(btn) btn.classList.add('active');
             
             // Update Preview Text
-            const map = { 'blue': 'Blau', 'red': 'Rot', 'green': 'Grün', 'orange': 'Orange', 'purple': 'Lila', 'pink': 'Pink' };
+            const map = { 'blue': 'Blau', 'red': 'Rot', 'green': 'Grün', 'orange': 'Orange', 'purple': 'Lila', 'pink': 'Pink', 'teal': 'Türkis', 'yellow': 'Gelb', 'indigo': 'Indigo', 'brown': 'Braun' };
             const preview = document.getElementById('accent-preview');
             if(preview) preview.textContent = map[color] || 'Blau';
         }
