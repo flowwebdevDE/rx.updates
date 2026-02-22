@@ -1479,7 +1479,11 @@ function renderToggleInternal(container) {
     debugBtn.onclick = () => {
         const err = sessionStorage.getItem('rx_launcher_error');
         const msg = err ? "Letzter Fehler:\n\n" + err : "Kein Fehler protokolliert.\n\nBitte versuche zuerst, die App-Bibliothek auf der Startseite zu öffnen, um den Fehler zu reproduzieren.";
-        alert(msg);
+        if (window.showAppPopup) {
+            window.showAppPopup('Launcher Debug', msg);
+        } else {
+            alert(msg);
+        }
     };
     container.appendChild(debugBtn);
 }

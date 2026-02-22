@@ -1,4 +1,6 @@
 (function() {
+    const APP_VERSION = '3.2.3';
+
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
     const PINKMODE_KEY = 'rx_pinkmode_enabled';
@@ -260,20 +262,27 @@
     };
 
     window.resetApp = function() {
-        if (confirm('Möchtest du die App wirklich zurücksetzen? Alle Einstellungen und Daten gehen verloren.')) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
+        const msg = 'Möchtest du die App wirklich zurücksetzen? Alle Einstellungen und Daten gehen verloren.';
+        const doReset = () => {
+             localStorage.clear();
+             sessionStorage.clear();
+             window.location.reload();
+        };
+
+        if (window.showAppPopup) {
+            window.showAppPopup('App zurücksetzen', msg, 'Zurücksetzen', doReset);
+        } else if (confirm(msg)) {
+            doReset();
         }
     };
 
     window.showDeviceInfo = function() {
-        const info = `
-User Agent: ${navigator.userAgent}
-Platform: ${navigator.platform}
-Screen: ${window.screen.width}x${window.screen.height}
-Pixel Ratio: ${window.devicePixelRatio}`;
-        alert(info);
+        const info = `User Agent: ${navigator.userAgent}\nPlatform: ${navigator.platform}\nScreen: ${window.screen.width}x${window.screen.height}\nPixel Ratio: ${window.devicePixelRatio}`;
+        if (window.showAppPopup) {
+            window.showAppPopup('Geräte-Infos', info);
+        } else {
+            alert(info);
+        }
     };
 
     window.getLauncherConfig = function() {
@@ -329,7 +338,7 @@ Pixel Ratio: ${window.devicePixelRatio}`;
         // Die URL muss auf eine version.json zeigen.
         // Für Plugin-Updates muss 'url' im JSON auf eine ZIP-Datei mit dem 'www'-Ordner zeigen!
         const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
-        const CURRENT_VERSION = '3.2.2'; 
+        const CURRENT_VERSION = APP_VERSION; 
         
         if(btnText) btnText.textContent = 'Prüfe...';
 
@@ -453,6 +462,11 @@ Pixel Ratio: ${window.devicePixelRatio}`;
                 .then(() => console.log('CapacitorUpdater: App ready notified'))
                 .catch(e => console.warn('CapacitorUpdater: notifyAppReady failed', e));
         }
+
+        // Update all version placeholders
+        document.querySelectorAll('.app-version').forEach(el => {
+            el.textContent = APP_VERSION;
+        });
     });
 
     // =========================================
