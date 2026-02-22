@@ -1,5 +1,5 @@
 {
-  "version": "3.2.0",
-  "changelog": "Neues Update verfügbar!",
-  "url": "https://github.com/flowwebdevDE/rx.updates/raw/refs/heads/main/releases/download/v3.2.0/update.zip"
+  "version": "3.2.1",
+  "changelog": "Fehler behoben bei dem der Pink Mode eventuell nicht funktioniert",
+  "url": "https://github.com/flowwebdevDE/rx.updates/raw/refs/heads/main/releases/download/v3.2.1/update.zip"
 }
