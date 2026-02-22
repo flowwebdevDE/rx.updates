@@ -1,0 +1,27 @@
+name: Create OTA Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggert bei Tags wie v3.2.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Erlaubt das Erstellen von Releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Zip www folder
+        run: |
+          cd www
+          zip -r ../update.zip ./*
+
+      - name: Create Release & Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: update.zip
+          generate_release_notes: true
