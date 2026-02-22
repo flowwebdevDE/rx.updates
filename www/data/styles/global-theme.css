@@ -248,10 +248,10 @@ body.design-focus .nav-card .icon-box {
 
 /* 6. Glass Theme (Glassmorphism) */
 body.design-glass {
-    --card-radius: 20px;
-    --background-color: #e0e5ec; /* Fallback */
-    --card-background: rgba(255, 255, 255, 0.65);
-    --border-color: rgba(255, 255, 255, 0.3);
+    --card-radius: 24px;
+    --background-color: transparent; /* Damit Gradient durchscheint */
+    --card-background: rgba(255, 255, 255, 0.6);
+    --border-color: rgba(255, 255, 255, 0.4);
 }
 body.design-glass .app {
     background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
@@ -267,11 +267,48 @@ body.design-glass.dark-mode {
 }
 body.design-glass .card, 
 body.design-glass .nav-card, 
-body.design-glass .popup-card {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+body.design-glass .popup-card,
+body.design-glass .settings-group,
+body.design-glass .weather-main-card,
+body.design-glass #popup,
+body.design-glass #mode-popup,
+body.design-glass .control-center-grid,
+body.design-glass .search-overlay,
+body.design-glass .header,
+body.design-glass .popup-content,
+body.design-glass .options-card,
+body.design-glass .login-card {
+    background-color: var(--card-background) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Glass Header Special */
+body.design-glass .header {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
+    margin-bottom: 10px;
+}
+body.design-glass.dark-mode .header {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Glass Inputs */
+body.design-glass input, 
+body.design-glass select, 
+body.design-glass textarea,
+body.design-glass .cc-button {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(4px);
+}
+body.design-glass.dark-mode input,
+body.design-glass.dark-mode select {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* 7. Bubble Theme (Round & Bouncy) */
@@ -281,12 +318,28 @@ body.design-bubble {
 body.design-bubble .dashboard-grid {
     gap: 20px !important;
 }
-body.design-bubble .nav-card {
+
+/* Bouncy Effect für alle interaktiven Elemente */
+body.design-bubble .nav-card,
+body.design-bubble .card,
+body.design-bubble button,
+body.design-bubble .btn-primary,
+body.design-bubble .btn-secondary,
+body.design-bubble .form-btn,
+body.design-bubble .cc-button,
+body.design-bubble .settings-item.is-button {
     box-shadow: 0 10px 20px rgba(0,0,0,0.08), 0 6px 6px rgba(0,0,0,0.1);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
 }
-body.design-bubble .nav-card:active {
-    transform: scale(0.9);
+
+body.design-bubble .nav-card:active,
+body.design-bubble button:active,
+body.design-bubble .btn-primary:active,
+body.design-bubble .btn-secondary:active,
+body.design-bubble .form-btn:active,
+body.design-bubble .cc-button:active,
+body.design-bubble .settings-item.is-button:active {
+    transform: scale(0.92);
 }
 
 /* 5. Tablet Layout (Sidebar Redesign) */
@@ -919,4 +972,20 @@ body.design-pink #status-notification .sn-icon {
 }
 body.design-pink #status-notification .sn-progress-bar {
     background: #fce4ec;
+}
+
+/* =========================================
+   GLOBAL OVERLAY BACKDROP BLUR
+   ========================================= */
+#popup-overlay,
+#mode-popup-overlay,
+#custom-popup-overlay,
+#confirm-overlay,
+#message-options-overlay,
+#create-group-overlay,
+#forward-overlay,
+#forward-confirm-overlay,
+#login-overlay {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
