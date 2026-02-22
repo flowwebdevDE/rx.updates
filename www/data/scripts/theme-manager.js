@@ -315,6 +315,15 @@
         applySettings();
     };
 
+    window.resetCustomWallpaper = function() {
+        const msg = 'Möchtest du das eigene Hintergrundbild entfernen und zum Standard-Design zurückkehren?';
+        if (window.showAppPopup) {
+            window.showAppPopup('Hintergrund zurücksetzen', msg, 'Entfernen', () => setCustomWallpaper(null));
+        } else if (confirm(msg)) {
+            setCustomWallpaper(null);
+        }
+    };
+
     window.setUsername = function(name) {
         localStorage.setItem(USERNAME_KEY, name);
     };

@@ -221,6 +221,12 @@
                     </div>
                     <span class="settings-value-row" id="bg-status">Wählen</span>
                 </div>
+                <div class="settings-item is-button" id="bg-reset-row" onclick="resetCustomWallpaper()" style="display: none;">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" style="color: #ff3b30;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <span class="settings-label" style="color: #ff3b30;">Hintergrund entfernen</span>
+                    </div>
+                </div>
                 <div class="settings-divider"></div>
                 <div class="settings-item is-button" id="accent-row" onclick="openPopup('accent-popup')">
                     <div class="settings-label-wrap">
@@ -397,7 +403,12 @@
         setValue('depth-slider', settings.depth);
         setValue('radius-slider', settings.customRadius || 18); // Default fallback
         setValue('font-select', settings.customFont || '');
-        if(settings.customWallpaper) document.getElementById('bg-status').textContent = 'Gesetzt (Tippen zum Ändern)';
+        
+        // Wallpaper UI State
+        if(settings.customWallpaper) {
+            document.getElementById('bg-status').textContent = 'Gesetzt';
+            document.getElementById('bg-reset-row').style.display = 'flex';
+        }
         
         // Dev Mode Initial State
         const devHeader = document.getElementById('dev-header');
@@ -526,7 +537,14 @@
             setValue('depth-slider', e.detail.depth);
             setValue('radius-slider', e.detail.customRadius || 18);
             setValue('font-select', e.detail.customFont || '');
-            if(e.detail.customWallpaper) document.getElementById('bg-status').textContent = 'Gesetzt';
+            
+            if(e.detail.customWallpaper) {
+                document.getElementById('bg-status').textContent = 'Gesetzt';
+                document.getElementById('bg-reset-row').style.display = 'flex';
+            } else {
+                document.getElementById('bg-status').textContent = 'Wählen';
+                document.getElementById('bg-reset-row').style.display = 'none';
+            }
             
             // Dev Mode Toggle
             if (devHeader && devGroup) {

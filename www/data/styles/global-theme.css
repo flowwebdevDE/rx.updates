@@ -72,6 +72,8 @@ body {
     color: var(--text-color);
     font-family: var(--font-family) !important;
     transition: background-color 0.3s, color 0.3s;
+    user-select: none; /* Verhindert Textauswahl (App-Feeling) */
+    -webkit-user-select: none;
 }
 
 .card, .nav-card, .popup-card, .options-card {
@@ -96,6 +98,8 @@ h1, h2, h3, h4, h5, h6, p, span, .ref, a {
 input, select, textarea {
     background: rgba(118, 118, 128, 0.12) !important;
     color: var(--text-color) !important;
+    user-select: text; /* Eingabefelder müssen auswählbar bleiben */
+    -webkit-user-select: text;
 }
 
 body.dark-mode input, 
@@ -255,12 +259,21 @@ body.design-glass {
     --card-background: rgba(255, 255, 255, 0.6);
     --border-color: rgba(255, 255, 255, 0.4);
 }
-body.design-glass .app {
+/* Fix für Mobile: Pseudo-Element statt background-attachment: fixed */
+body.design-glass::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    background-attachment: fixed;
-    background-size: cover;
+    z-index: -1;
+}
+body.design-glass .app {
+    background: transparent;
 }
 body.design-glass.dark-mode .app {
+    background: transparent;
+}
+body.design-glass.dark-mode::before {
     background: linear-gradient(135deg, #232526 0%, #414345 100%);
 }
 body.design-glass.dark-mode {
