@@ -13,6 +13,7 @@
     const LAUNCHER_APPS_KEY = 'rx_launcher_apps';
     const ACCENT_KEY = 'rx_accent';
     const USERNAME_KEY = 'rx_username';
+    const DEPTH_KEY = 'rx_3d_depth';
 
     function applySettings() {
         const isTablet = window.innerWidth >= 768;
@@ -29,6 +30,7 @@
         const notificationsEnabled = localStorage.getItem(FEAT_NOTIFICATIONS_KEY) !== 'false'; // Standard: an
         const launcherEnabled = localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true'; // Standard: aus
         const accent = localStorage.getItem(ACCENT_KEY) || 'blue';
+        const depth = parseInt(localStorage.getItem(DEPTH_KEY) || '0');
 
         // Wenn Pink Mode an ist, überschreibt er das Design
         if (pinkMode) {
@@ -37,7 +39,7 @@
 
         const body = document.body;
         // Alte Design-Klassen entfernen
-        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet', 'design-glass', 'design-bubble', 'design-3d');
+        body.classList.remove('design-standard', 'design-list', 'design-tiles', 'design-focus', 'design-pink', 'design-tablet', 'design-glass', 'design-bubble');
         // Neues Design setzen
         if (!body.classList.contains('no-layout-change') || design === 'pink' || design === 'tablet') {
             body.classList.add('design-' + design);
@@ -60,6 +62,14 @@
             body.classList.add('launcher-mode');
         } else {
             body.classList.remove('launcher-mode');
+        }
+
+        // 3D Depth Effect
+        body.style.setProperty('--depth-value', depth);
+        if (depth > 0) {
+            body.classList.add('enable-3d-effect');
+        } else {
+            body.classList.remove('enable-3d-effect');
         }
 
         // Tablet Theme CSS Injection
@@ -206,7 +216,7 @@
 
         // Event feuern für UI-Updates (z.B. in index.html)
         window.dispatchEvent(new CustomEvent('rx-settings-changed', { 
-            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode } 
+            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth } 
         }));
 
         updateDevTrigger(devMode);
@@ -246,6 +256,11 @@
 
     window.setAccent = function(color) {
         localStorage.setItem(ACCENT_KEY, color);
+        applySettings();
+    };
+
+    window.set3DDepth = function(value) {
+        localStorage.setItem(DEPTH_KEY, value);
         applySettings();
     };
 
@@ -355,7 +370,8 @@
             launcherEnabled: localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true',
             launcherApps: JSON.parse(localStorage.getItem(LAUNCHER_APPS_KEY) || '[]'),
             accent: localStorage.getItem(ACCENT_KEY) || 'blue',
-            username: localStorage.getItem(USERNAME_KEY) || ''
+            username: localStorage.getItem(USERNAME_KEY) || '',
+            depth: parseInt(localStorage.getItem(DEPTH_KEY) || '0')
         };
     };
 

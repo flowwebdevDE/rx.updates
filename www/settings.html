@@ -183,6 +183,14 @@
                         <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
                 </div>
+                <div class="settings-divider"></div>
+                <div class="settings-item">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <span class="settings-label">3D Tiefe</span>
+                    </div>
+                    <input type="range" id="depth-slider" min="0" max="20" step="1" style="width: 120px; accent-color: var(--accent-color);">
+                </div>
                 <div class="settings-divider" id="accent-divider"></div>
                 <div class="settings-item is-button" id="accent-row" onclick="openPopup('accent-popup')">
                     <div class="settings-label-wrap">
@@ -303,7 +311,6 @@
             <div class="selection-item" onclick="selectDesign('focus')" id="btn-focus">Fokus</div>
             <div class="selection-item" onclick="selectDesign('glass')" id="btn-glass">Glass</div>
             <div class="selection-item" onclick="selectDesign('bubble')" id="btn-bubble">Bubble</div>
-            <div class="selection-item" onclick="selectDesign('3d')" id="btn-3d">3D</div>
             <div class="selection-item" onclick="selectDesign('tablet')" id="btn-tablet" style="grid-column: 1 / -1;">Tablet (Breit)</div>
         </div>
     </div>
@@ -356,6 +363,7 @@
         setChecked('weather-toggle', settings.weatherEnabled);
         setChecked('notifications-toggle', settings.notificationsEnabled);
         setValue('username-input', settings.username);
+        setValue('depth-slider', settings.depth);
         
         // Dev Mode Initial State
         const devHeader = document.getElementById('dev-header');
@@ -374,6 +382,7 @@
         addListener('weather-toggle', 'change', (e) => setFeature('weather', e.target.checked));
         addListener('notifications-toggle', 'change', (e) => setFeature('notifications', e.target.checked));
         addListener('username-input', 'input', (e) => setUsername(e.target.value));
+        addListener('depth-slider', 'input', (e) => set3DDepth(e.target.value));
 
         // Popup Logic
         const overlay = document.getElementById('popup-overlay');
@@ -425,7 +434,7 @@
             if(btn) btn.classList.add('active');
             
             // Update Preview Text
-            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet', 'glass': 'Glass', 'bubble': 'Bubble', '3d': '3D' };
+            const map = { 'standard': 'Standard', 'list': 'Liste', 'tiles': 'Kacheln', 'focus': 'Fokus', 'tablet': 'Tablet', 'glass': 'Glass', 'bubble': 'Bubble' };
             const preview = document.getElementById('layout-preview');
             if(preview) preview.textContent = map[design] || 'Standard';
 
@@ -461,6 +470,7 @@
             setChecked('pinkmode-toggle', e.detail.pinkMode);
             updateActiveBtn(e.detail.design);
             updateActiveAccent(e.detail.accent);
+            setValue('depth-slider', e.detail.depth);
             
             // Dev Mode Toggle
             if (devHeader && devGroup) {
