@@ -10,6 +10,7 @@
     --button-secondary-bg: #e4e6eb;
     --button-secondary-text: #000000;
     --font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+    --splash-bg: var(--background-color);
 }
 
 /* Dark Mode */
@@ -258,6 +259,7 @@ body.design-glass {
     --background-color: transparent; /* Damit Gradient durchscheint */
     --card-background: rgba(255, 255, 255, 0.6);
     --border-color: rgba(255, 255, 255, 0.4);
+    --splash-bg: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
 }
 /* Fix für Mobile: Pseudo-Element statt background-attachment: fixed */
 body.design-glass::before {
@@ -279,6 +281,7 @@ body.design-glass.dark-mode::before {
 body.design-glass.dark-mode {
     --card-background: rgba(30, 30, 30, 0.6);
     --border-color: rgba(255, 255, 255, 0.1);
+    --splash-bg: linear-gradient(135deg, #232526 0%, #414345 100%);
 }
 body.design-glass .card, 
 body.design-glass .nav-card, 
@@ -957,6 +960,13 @@ body.design-pink #status-notification {
 }
 body.design-pink #status-notification .sn-icon {
     color: #fce4ec;
+}
+
+/* Glass Mode Override - Ensure it stays black/opaque */
+body.design-glass #status-notification {
+    background: #000000 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 /* Spinner Animation */
