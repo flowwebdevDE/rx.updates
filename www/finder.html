@@ -702,23 +702,21 @@
             const originalStatus = statusText.textContent;
             statusText.textContent = 'Standort wird ermittelt...';
 
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    currentPosition = pos.coords;
-                    updateNearbyStations();
-                    statusText.textContent = originalStatus.startsWith('Geladen:') ? originalStatus : '';
-                    if (refreshTimer) clearInterval(refreshTimer);
-                    refreshTimer = setInterval(updateNearbyStations, 5 * 60 * 1000);
-                    geoBtn.querySelector('span').textContent = 'Umkreis';
-                    geoBtn.disabled = false;
-                },
-                err => {
-                    statusText.textContent = 'Standortzugriff verweigert';
-                    geoBtn.querySelector('span').textContent = 'Umkreis';
-                    geoBtn.disabled = true; // Keep it disabled if permission is denied
-                    console.error(err);
-                }
-            );
+            // Nutze die neue schnelle Schnittstelle
+            window.rxGetPosition().then(pos => {
+                currentPosition = pos.coords;
+                updateNearbyStations();
+                statusText.textContent = originalStatus.startsWith('Geladen:') ? originalStatus : '';
+                if (refreshTimer) clearInterval(refreshTimer);
+                refreshTimer = setInterval(updateNearbyStations, 5 * 60 * 1000);
+                geoBtn.querySelector('span').textContent = 'Umkreis';
+                geoBtn.disabled = false;
+            }).catch(err => {
+                statusText.textContent = 'Standort nicht verfügbar';
+                geoBtn.querySelector('span').textContent = 'Umkreis';
+                geoBtn.disabled = false;
+                console.error(err);
+            });
         }
 
         // Funktion, um von Android aufgerufen zu werden

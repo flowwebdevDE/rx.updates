@@ -1231,8 +1231,8 @@ function updateWeatherWidget() {
     
     // Simple Mockup or fetch if location available
     // Hier nutzen wir eine einfache OpenMeteo Abfrage, falls Koordinaten da sind
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
+    if (window.rxGetPosition) {
+        window.rxGetPosition().then(async (pos) => {
             try {
                 const { latitude, longitude } = pos.coords;
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
@@ -1252,7 +1252,7 @@ function updateWeatherWidget() {
             } catch(e) {
                 el.querySelector('.widget-content').textContent = "--°";
             }
-        }, () => {
+        }).catch(() => {
             el.querySelector('.widget-content').textContent = "Kein GPS";
         });
     }
@@ -1277,8 +1277,8 @@ function updateStationWidget() {
     const el = document.getElementById('launcher-station-widget');
     if(!el || !stationDataCache) return;
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
+    if (window.rxGetPosition) {
+        window.rxGetPosition().then((pos) => {
             const { latitude, longitude } = pos.coords;
             
             // Sort by distance

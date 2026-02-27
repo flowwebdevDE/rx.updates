@@ -87,6 +87,10 @@ main {
     color: var(--text-muted);
 }
 
+#suggestionsList {
+    z-index: 1000;
+}
+
 #geoBtn {
     margin-top: 8px;
     width: 100%;

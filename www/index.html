@@ -102,7 +102,7 @@
     <img src="data/images/logos/logo.png" alt="Logo" style="width: 100px; height: 100px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px;">
     <h1 style="font-size: 24px; margin-bottom: 30px; color: var(--text-color); font-weight: 700;">Rail Explorer +</h1>
     <div style="width: 200px; height: 4px; background: rgba(128,128,128,0.2); border-radius: 2px; overflow: hidden;">
-      <div id="splash-progress" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 0.8s linear;"></div>
+      <div id="splash-progress" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 0.5s linear;"></div>
     </div>
     <p id="splash-greeting" style="margin-top: 20px; color: var(--accent-color); font-weight: 500; min-height: 20px;"></p>
   </div>
@@ -167,7 +167,7 @@
         </a>
 
         <!-- Sichtungen -->
-        <a href="sightings.html" class="card nav-card">
+        <a href="sightings.html" class="card nav-card" id="sightings-card" style="display: none;">
           <div class="icon-box"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
           <h3>Sichtungen</h3>
           <p>Live-Meldungen</p>
@@ -206,6 +206,12 @@
   <script src="data/scripts/theme-manager.js"></script>
   <script>
     window.addEventListener('rx-settings-changed', (e) => {
+        // Premium Check für Sichtungen
+        const sightingsCard = document.getElementById('sightings-card');
+        if (sightingsCard) {
+            sightingsCard.style.display = e.detail.isPremium ? 'flex' : 'none';
+        }
+
         const { weatherEnabled, locationEnabled } = e.detail;
         const weatherCard = document.getElementById('weather-card-link');
         if (!weatherCard) return;
@@ -252,6 +258,12 @@
         const progress = document.getElementById('splash-progress');
         const greeting = document.getElementById('splash-greeting');
 
+        // Initial Premium Check
+        const sightingsCard = document.getElementById('sightings-card');
+        if (sightingsCard && settings.isPremium) {
+            sightingsCard.style.display = 'flex';
+        }
+
         if (!hasGreeted) {
             if (settings.username) {
                 greeting.textContent = `Hallo, ${settings.username}`;
@@ -264,7 +276,7 @@
                 splash.style.opacity = '0';
                 setTimeout(() => { splash.style.display = 'none'; }, 500);
                 sessionStorage.setItem('rx_greeted', 'true');
-            }, 850); // 0.8 Sekunden + Puffer
+            }, 550); // 0.5 Sekunden + Puffer
         }
 
         // Kamera-Button Logik

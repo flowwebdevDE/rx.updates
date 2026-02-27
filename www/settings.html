@@ -271,12 +271,12 @@
 
             <h3>Über</h3>
             <div class="settings-group">
-                <div class="settings-item">
+                <div class="settings-item is-button" onclick="handleStatusClick()">
                     <div class="settings-label-wrap">
                         <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <span class="settings-label">Status</span>
                     </div>
-                    <span class="settings-value-row">Premium</span>
+                    <span class="settings-value-row" id="status-display">Standard</span>
                 </div>
                 <div class="settings-divider"></div>
                 <a href="mailto:info@flowwebdesign.de" class="settings-item is-button" style="text-decoration: none;">
@@ -399,6 +399,17 @@
         </div>
     </div>
 
+    <!-- Premium Code Popup -->
+    <div id="premium-popup" class="popup-content">
+        <div class="popup-header">
+            <h2 class="popup-title">Premium aktivieren</h2>
+            <button class="popup-close" onclick="closeAllPopups()">✕</button>
+        </div>
+        <p style="margin: 10px 0; color: var(--secondary-text-color);">Bitte gib deinen Zugangscode ein, um Premium-Funktionen freizuschalten.</p>
+        <input type="text" id="premium-code-input" class="settings-input" style="width: 100%; text-align: left; background: var(--background-color) !important; padding: 12px; border-radius: 12px; margin-bottom: 20px;" placeholder="Code eingeben">
+        <button onclick="submitPremiumCode()" style="width: 100%; padding: 16px; background: var(--accent-color); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 16px;">Freischalten</button>
+    </div>
+
     <!-- Generic Message Popup -->
     <div id="message-popup" class="popup-content" style="max-height: auto;">
         <div class="popup-header">
@@ -430,6 +441,12 @@
         setValue('depth-slider', settings.depth);
         setValue('radius-slider', settings.customRadius || 18); // Default fallback
         setValue('font-select', settings.customFont || '');
+        
+        if (settings.isPremium) {
+            document.getElementById('status-display').textContent = 'Premium';
+            document.getElementById('status-display').style.color = 'var(--accent-color)';
+            document.getElementById('status-display').style.fontWeight = 'bold';
+        }
         
         // Wallpaper UI State
         if(settings.customWallpaper) {
@@ -474,6 +491,36 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // Premium Logic
+        function handleStatusClick() {
+            const isPrem = getSettings().isPremium;
+            if (isPrem) {
+                if (window.showAppPopup) {
+                    window.showAppPopup('Status', 'Du bist bereits Premium-Nutzer.', 'Deaktivieren', () => {
+                        setPremiumStatus(false);
+                        window.location.reload();
+                    });
+                }
+            } else {
+                openPopup('premium-popup');
+                setTimeout(() => document.getElementById('premium-code-input').focus(), 100);
+            }
+        }
+
+        function submitPremiumCode() {
+            const code = document.getElementById('premium-code-input').value;
+            if (checkPremiumCode(code)) {
+                setPremiumStatus(true);
+                closeAllPopups();
+                if (window.showNotification) window.showNotification('Erfolg', 'Premium freigeschaltet!', null, 3000, true);
+                document.getElementById('premium-code-input').value = '';
+            } else {
+                if (window.showNotification) window.showNotification('Fehler', 'Ungültiger Code', null, 2000, true);
+                else alert('Ungültiger Code');
+                // Shake animation could be added here
+            }
+        }
 
         // Popup Logic
         const overlay = document.getElementById('popup-overlay');
@@ -571,6 +618,16 @@
             } else {
                 document.getElementById('bg-status').textContent = 'Wählen';
                 document.getElementById('bg-reset-row').style.display = 'none';
+            }
+
+            if (e.detail.isPremium) {
+                document.getElementById('status-display').textContent = 'Premium';
+                document.getElementById('status-display').style.color = 'var(--accent-color)';
+                document.getElementById('status-display').style.fontWeight = 'bold';
+            } else {
+                document.getElementById('status-display').textContent = 'Standard';
+                document.getElementById('status-display').style.color = '';
+                document.getElementById('status-display').style.fontWeight = '';
             }
             
             // Dev Mode Toggle

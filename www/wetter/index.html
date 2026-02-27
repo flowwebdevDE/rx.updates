@@ -7,6 +7,34 @@
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Wetter</title>
+    <script>
+        // Location Override Logic (Muss VOR app.js laufen)
+        // Wenn ein Ort manuell gewählt wurde, simulieren wir diesen als GPS-Position.
+        (function() {
+            const savedLoc = localStorage.getItem('rx_weather_location');
+            if (savedLoc) {
+                try {
+                    const loc = JSON.parse(savedLoc);
+                    // Wir überschreiben die Geolocation API, damit app.js den gewählten Ort nutzt
+                    const originalGetCurrentPosition = navigator.geolocation.getCurrentPosition;
+                    navigator.geolocation.getCurrentPosition = function(success, error, options) {
+                        const pos = {
+                            coords: {
+                                latitude: loc.lat,
+                                longitude: loc.lon,
+                                accuracy: 10,
+                                altitude: null, altitudeAccuracy: null, heading: null, speed: null
+                            },
+                            timestamp: Date.now()
+                        };
+                        // Asynchron simulieren
+                        setTimeout(() => success(pos), 10);
+                    };
+                    console.log('Wetter-Standort überschrieben:', loc.name);
+                } catch(e) { console.error(e); }
+            }
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="scripts/charts.js" defer></script>
     <script src="scripts/day.js?v=2" defer></script>
@@ -129,14 +157,21 @@
             z-index: 100;
             overflow: hidden;
         }
-        #suggestionsList div {
-            padding: 14px 16px;
+        
+        /* Neue Styles für Suchergebnisse */
+        .suggestion-item {
+            display: flex; align-items: center; padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            color: var(--text-color);
+            cursor: pointer; transition: background 0.2s;
         }
-        #suggestionsList div:last-child { border-bottom: none; }
-        #suggestionsList div:active { background: var(--background-color); }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:active { background: var(--background-color); }
+        
+        .suggestion-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--button-secondary-bg); color: var(--text-color); display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; }
+        .suggestion-icon svg { width: 20px; height: 20px; }
+        .suggestion-info { flex: 1; min-width: 0; text-align: left; }
+        .suggestion-title { font-size: 15px; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .suggestion-desc { font-size: 12px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
         /* Stunden-Vorschau */
         #hourlyForecastGrid { 
@@ -257,7 +292,7 @@
         <main class="content">
             <div class="card" id="search-card" style="display: none;">
                 <div class="searchContainer">
-                    <input id="searchBox" placeholder="Ort suchen..." autocomplete="off">
+                    <input id="searchBox" placeholder="Ort oder Bahnhof suchen..." autocomplete="off">
                     <div id="suggestionsList"></div>
                     <button id="geoBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -329,6 +364,108 @@
             });
         });
         observer.observe(weatherContainer, { attributes: true });
+
+        // --- SEARCH LOGIC ---
+        const searchBox = document.getElementById('searchBox');
+        const suggestionsList = document.getElementById('suggestionsList');
+        const geoBtn = document.getElementById('geoBtn');
+        let stations = [];
+        let debounceTimer;
+
+        // 1. Bahnhöfe laden
+        async function loadStations() {
+            try {
+                const res = await fetch('../data/DE_stations.json');
+                const data = await res.json();
+                stations = data.elements || [];
+            } catch (e) { console.warn('Stations load failed', e); }
+        }
+        loadStations();
+
+        // 2. Suche ausführen
+        searchBox.addEventListener('input', (e) => {
+            const term = e.target.value.trim();
+            clearTimeout(debounceTimer);
+            
+            if (term.length < 2) {
+                suggestionsList.innerHTML = '';
+                return;
+            }
+
+            debounceTimer = setTimeout(async () => {
+                suggestionsList.innerHTML = '<div class="suggestion-item" style="justify-content:center; color:var(--secondary-text-color);">Suche...</div>';
+                
+                // A. Bahnhöfe filtern
+                const stationResults = stations
+                    .filter(s => s.tags.name && s.tags.name.toLowerCase().includes(term.toLowerCase()))
+                    .slice(0, 3)
+                    .map(s => ({
+                        name: s.tags.name,
+                        desc: 'Bahnhof',
+                        lat: s.lat,
+                        lon: s.lon,
+                        type: 'station'
+                    }));
+
+                // B. Orte via OpenMeteo suchen
+                let cityResults = [];
+                try {
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(term)}&count=5&language=de&format=json`);
+                    const geoData = await geoRes.json();
+                    if (geoData.results) {
+                        cityResults = geoData.results.map(c => ({
+                            name: c.name,
+                            desc: `${c.admin1 || ''}, ${c.country || ''}`,
+                            lat: c.latitude,
+                            lon: c.longitude,
+                            type: 'city'
+                        }));
+                    }
+                } catch(e) { console.warn('Geo search failed', e); }
+
+                renderSuggestions([...stationResults, ...cityResults]);
+            }, 400);
+        });
+
+        function renderSuggestions(results) {
+            suggestionsList.innerHTML = '';
+            if (results.length === 0) {
+                suggestionsList.innerHTML = '<div class="suggestion-item" style="justify-content:center; color:var(--secondary-text-color);">Keine Ergebnisse</div>';
+                return;
+            }
+
+            results.forEach(res => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                
+                const icon = res.type === 'station' 
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>';
+
+                div.innerHTML = `
+                    <div class="suggestion-icon">${icon}</div>
+                    <div class="suggestion-info">
+                        <div class="suggestion-title">${res.name}</div>
+                        <div class="suggestion-desc">${res.desc}</div>
+                    </div>
+                `;
+                
+                div.onclick = () => selectLocation(res);
+                suggestionsList.appendChild(div);
+            });
+        }
+
+        function selectLocation(loc) {
+            // Speichern und Reload, damit der Override oben greift
+            localStorage.setItem('rx_weather_location', JSON.stringify(loc));
+            window.location.reload();
+        }
+
+        // GPS Button: Zurücksetzen auf echten Standort
+        geoBtn.addEventListener('click', () => {
+            localStorage.removeItem('rx_weather_location');
+            window.location.reload();
+        });
     </script>
 </body>
 

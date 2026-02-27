@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.2';
+    const APP_VERSION = '3.4.5';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -17,6 +17,8 @@
     const WALLPAPER_KEY = 'rx_custom_wallpaper';
     const RADIUS_KEY = 'rx_custom_radius';
     const FONT_KEY = 'rx_custom_font';
+    const PREMIUM_KEY = 'rx_is_premium';
+    const PREMIUM_CODE = 'premium'; // Der Code für Premium
 
     function applySettings() {
         const isTablet = window.innerWidth >= 768;
@@ -37,6 +39,7 @@
         const customWallpaper = localStorage.getItem(WALLPAPER_KEY);
         const customRadius = localStorage.getItem(RADIUS_KEY);
         const customFont = localStorage.getItem(FONT_KEY);
+        const isPremium = localStorage.getItem(PREMIUM_KEY) === 'true';
 
         // Wenn Pink Mode an ist, überschreibt er das Design
         if (pinkMode) {
@@ -251,7 +254,7 @@
 
         // Event feuern für UI-Updates (z.B. in index.html)
         window.dispatchEvent(new CustomEvent('rx-settings-changed', { 
-            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth, customRadius, customFont, customWallpaper } 
+            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth, customRadius, customFont, customWallpaper, isPremium } 
         }));
 
         updateDevTrigger(devMode);
@@ -313,6 +316,15 @@
         if(dataUrl) localStorage.setItem(WALLPAPER_KEY, dataUrl);
         else localStorage.removeItem(WALLPAPER_KEY);
         applySettings();
+    };
+
+    window.setPremiumStatus = function(active) {
+        localStorage.setItem(PREMIUM_KEY, active);
+        applySettings();
+    };
+
+    window.checkPremiumCode = function(input) {
+        return input && input.trim().toLowerCase() === PREMIUM_CODE;
     };
 
     window.resetCustomWallpaper = function() {
@@ -434,7 +446,8 @@
             depth: parseInt(localStorage.getItem(DEPTH_KEY) || '0'),
             customRadius: localStorage.getItem(RADIUS_KEY),
             customFont: localStorage.getItem(FONT_KEY),
-            customWallpaper: localStorage.getItem(WALLPAPER_KEY)
+            customWallpaper: localStorage.getItem(WALLPAPER_KEY),
+            isPremium: localStorage.getItem(PREMIUM_KEY) === 'true'
         };
     };
 
@@ -714,6 +727,43 @@
             window.notifTimeout = setTimeout(() => notif.classList.remove('visible'), duration);
         }
     };
+
+    // =========================================
+    // FAST GEOLOCATION (Native Bridge)
+    // =========================================
+    window.rxGetPosition = async function(options = {}) {
+        // Standard-Optionen für schnelle Ergebnisse
+        const opts = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 60000, // Ergebnisse bis zu 60s alt akzeptieren (extrem schnell)
+            ...options
+        };
+
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
+            try {
+                // Native Schnittstelle nutzen
+                return await window.Capacitor.Plugins.Geolocation.getCurrentPosition(opts);
+            } catch (e) {
+                console.warn('Native Geo failed, falling back to web', e);
+            }
+        }
+        
+        // Fallback auf Web API
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+            navigator.geolocation.getCurrentPosition(resolve, reject, opts);
+        });
+    };
+
+    // Polyfill: Überschreibe navigator.geolocation für alle Skripte (z.B. Wetter)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition = function(success, error, options) {
+            window.rxGetPosition(options)
+                .then(pos => success(pos))
+                .catch(err => error && error(err));
+        };
+    }
 
     window.resetUpdates = async function() {
         const CapacitorUpdater = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;

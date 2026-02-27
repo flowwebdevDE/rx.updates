@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Deine Cloudflare Worker URL (funktioniert jetzt direkt ohne Unterpfad)
     const API_URL = 'https://sichtungen.red-dawn-bec6.workers.dev/';
-    const ACCESS_CODE = 'premium'; // Der Code für den Zugang
 
     // --- 1. User ID & Login Logic ---
     let userId = localStorage.getItem('rx_user_id');
@@ -92,22 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let readStatus = JSON.parse(localStorage.getItem('rx_read_status') || '{}');
 
     function checkAccess() {
-        if (localStorage.getItem('rx_access_granted') === 'true') {
-            loginOverlay.classList.add('hidden');
+        // Prüfen ob Premium global aktiviert ist
+        if (localStorage.getItem('rx_is_premium') === 'true') {
+            if (loginOverlay) loginOverlay.classList.add('hidden');
             startApp();
+        } else {
+            // Kein Zugriff -> Zurück zur Startseite
+            window.location.href = 'index.html';
         }
     }
 
-    loginBtn.addEventListener('click', () => {
-        if (accessCodeInput.value.trim() === ACCESS_CODE) {
-            localStorage.setItem('rx_access_granted', 'true');
-            loginOverlay.classList.add('hidden');
-            startApp();
-        } else {
-            loginError.style.display = 'block';
-            vibrate();
-        }
-    });
 
     // --- Custom Popup Logic ---
     function showPopup(msg) {
