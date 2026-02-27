@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Softwareupdate</title>
+    <link rel="stylesheet" href="data/styles/dashboard.css">
+    <link rel="stylesheet" href="data/styles/global-theme.css">
+    <style>
+        .update-card {
+            border: 2px solid var(--accent-color);
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        .update-card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .update-card .version-tag {
+            background: var(--accent-bg);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .update-card .changelog {
+            background: var(--background-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .update-card button {
+            width: 100%;
+            padding: 16px;
+        }
+        .version-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .version-item:last-child { border-bottom: none; }
+        .version-info {
+            font-weight: 500;
+        }
+        .version-info .current-tag {
+            font-size: 12px;
+            color: var(--secondary-text-color);
+            margin-left: 8px;
+        }
+        .version-actions button {
+            padding: 6px 14px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="no-layout-change">
+    <div class="app">
+        <header class="header">
+            <a href="settings.html" class="back-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </a>
+            <h1>Softwareupdate</h1>
+            <p>Versionen verwalten</p>
+        </header>
+        <main class="content">
+
+            <!-- New Update Section -->
+            <div id="new-update-section" class="card update-card" style="display: none;">
+                <h2>Neues Update verfügbar</h2>
+                <p class="version-tag" id="new-version-number"></p>
+                <div class="changelog" id="new-version-changelog"></div>
+                <button id="install-update-btn" class="btn-primary">Laden & Installieren</button>
+            </div>
+
+            <!-- Status/Info Section -->
+            <div id="update-status-card" class="card">
+                <p id="update-status-text">Prüfe auf Updates...</p>
+            </div>
+
+            <!-- Installed Versions Section -->
+            <h3>Installierte Versionen</h3>
+            <div id="installed-versions-list" class="settings-group">
+                <!-- JS populates this -->
+            </div>
+        </main>
+    </div>
+
+    <script src="data/scripts/theme-manager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const newUpdateSection = document.getElementById('new-update-section');
+            const statusCard = document.getElementById('update-status-card');
+            const statusText = document.getElementById('update-status-text');
+            const installedList = document.getElementById('installed-versions-list');
+            const installBtn = document.getElementById('install-update-btn');
+
+            const CapacitorUpdater = window.getCapacitorUpdater();
+            let newUpdateData = null;
+
+            async function renderInstalledVersions() {
+                installedList.innerHTML = '<div class="version-item">Lade Versionen...</div>';
+                if (!CapacitorUpdater) {
+                    installedList.innerHTML = '<div class="version-item">Updater-Plugin nicht verfügbar.</div>';
+                    return;
+                }
+                try {
+                    const list = await CapacitorUpdater.list();
+                    const current = await CapacitorUpdater.current();
+                    installedList.innerHTML = '';
+
+                    const originalVersionItem = document.createElement('div');
+                    originalVersionItem.className = 'version-item';
+                    originalVersionItem.innerHTML = `
+                        <div class="version-info">
+                            Original-Version <span class="app-version"></span>
+                            ${!current.id ? '<span class="current-tag">(Aktiv)</span>' : ''}
+                        </div>
+                        <div class="version-actions">
+                            ${current.id ? '<button class="btn-secondary">Aktivieren</button>' : ''}
+                        </div>
+                    `;
+                    if (current.id) {
+                        originalVersionItem.querySelector('button').onclick = async () => {
+                            await CapacitorUpdater.reset();
+                            window.location.reload();
+                        };
+                    }
+                    installedList.appendChild(originalVersionItem);
+
+                    if (!list.versions || list.versions.length === 0) return;
+
+                    list.versions.forEach(v => {
+                        const isActive = v.id === current.id;
+                        const item = document.createElement('div');
+                        item.className = 'version-item';
+                        item.innerHTML = `
+                            <div class="version-info">
+                                Version ${v.version}
+                                ${isActive ? '<span class="current-tag">(Aktiv)</span>' : ''}
+                            </div>
+                            <div class="version-actions">
+                                ${!isActive ? '<button class="btn-secondary">Aktivieren</button>' : ''}
+                            </div>
+                        `;
+                        if (!isActive) {
+                            item.querySelector('button').onclick = async () => {
+                                item.querySelector('button').textContent = 'Aktiviere...';
+                                await CapacitorUpdater.set(v);
+                                window.location.reload();
+                            };
+                        }
+                        installedList.appendChild(item);
+                    });
+                } catch (e) {
+                    installedList.innerHTML = `<div class="version-item" style="color: #ff3b30;">Fehler: ${e.message}</div>`;
+                }
+            }
+
+            async function checkForNewUpdate() {
+                try {
+                    const updateData = await window.getUpdateInfo();
+                    if (updateData) {
+                        newUpdateData = updateData;
+                        document.getElementById('new-version-number').textContent = `Version ${updateData.version}`;
+                        document.getElementById('new-version-changelog').textContent = updateData.changelog || 'Keine Informationen verfügbar.';
+                        newUpdateSection.style.display = 'block';
+                        statusCard.style.display = 'none';
+                    } else {
+                        statusText.textContent = 'Deine App ist auf dem neuesten Stand.';
+                    }
+                } catch (e) {
+                    statusText.textContent = 'Fehler bei der Update-Prüfung.';
+                }
+            }
+
+            installBtn.addEventListener('click', () => {
+                if (newUpdateData) {
+                    // Wir rufen die globale Funktion auf, die die UI-Updates (Benachrichtigung etc.) handhabt
+                    window.checkForOTAUpdates(false, newUpdateData);
+                }
+            });
+
+            renderInstalledVersions();
+            checkForNewUpdate();
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.5';
+    const APP_VERSION = '3.4.6';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -451,28 +451,36 @@
         };
     };
 
+    // Holt nur die Update-Infos vom Server
+    window.getUpdateInfo = async function() {
+        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
+        const CURRENT_VERSION = APP_VERSION;
+        try {
+            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
+            const data = await response.json();
+            if (data.version > CURRENT_VERSION) {
+                return data; // Update-Daten zurückgeben
+            }
+            return null; // Kein Update
+        } catch (e) {
+            console.warn('OTA Check failed:', e);
+            throw e; // Fehler weitergeben, damit die UI ihn behandeln kann
+        }
+    };
+
     // OTA Update Logic
-    window.checkForOTAUpdates = async function() {
+    window.checkForOTAUpdates = async function(isSilent = false, preloadedData = null) {
         const btnText = document.querySelector('#update-check-btn span:first-child');
         const originalText = btnText ? btnText.textContent : 'Nach Updates suchen';
-        
-        // HIER ANPASSEN: Deine GitHub Raw URL
-        // Die URL muss auf eine version.json zeigen.
-        // Für Plugin-Updates muss 'url' im JSON auf eine ZIP-Datei mit dem 'www'-Ordner zeigen!
-        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
-        const CURRENT_VERSION = APP_VERSION; 
-        
+
         if(btnText) btnText.textContent = 'Prüfe...';
 
         try {
-            // Cache-Busting
-            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
-            
-            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
-            
-            const data = await response.json();
-            
-            if (data.version > CURRENT_VERSION) {
+            // Wenn keine Daten vorab geladen wurden, jetzt fetchen
+            const data = preloadedData || await window.getUpdateInfo();
+
+            if (data) {
                 const performUpdate = async () => {
                     // Prüfen ob es sich um eine APK handelt (dann immer Browser nutzen)
                     const isApk = data.url && data.url.toLowerCase().endsWith('.apk');
@@ -728,42 +736,10 @@
         }
     };
 
-    // =========================================
-    // FAST GEOLOCATION (Native Bridge)
-    // =========================================
-    window.rxGetPosition = async function(options = {}) {
-        // Standard-Optionen für schnelle Ergebnisse
-        const opts = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 60000, // Ergebnisse bis zu 60s alt akzeptieren (extrem schnell)
-            ...options
-        };
-
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
-            try {
-                // Native Schnittstelle nutzen
-                return await window.Capacitor.Plugins.Geolocation.getCurrentPosition(opts);
-            } catch (e) {
-                console.warn('Native Geo failed, falling back to web', e);
-            }
-        }
-        
-        // Fallback auf Web API
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
-            navigator.geolocation.getCurrentPosition(resolve, reject, opts);
-        });
+    // Helper, um das Plugin-Objekt sicher abzurufen
+    window.getCapacitorUpdater = function() {
+        return (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
     };
-
-    // Polyfill: Überschreibe navigator.geolocation für alle Skripte (z.B. Wetter)
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition = function(success, error, options) {
-            window.rxGetPosition(options)
-                .then(pos => success(pos))
-                .catch(err => error && error(err));
-        };
-    }
 
     window.resetUpdates = async function() {
         const CapacitorUpdater = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;

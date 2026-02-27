@@ -252,6 +252,14 @@
             <h3>System</h3>
             <div class="settings-group">
                 <div style="display: none;" id="launcher-settings-placeholder"></div>
+                <div class="settings-item">
+                    <div class="settings-label-wrap">
+                        <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                        <span class="settings-label">Automatische Updates</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="autoupdate-toggle"><span class="slider"></span></label>
+                </div>
+                <div class="settings-divider"></div>
                 <div class="settings-item is-button" id="version-row">
                     <div class="settings-label-wrap">
                         <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -260,13 +268,13 @@
                     <span class="settings-value-row">v<span class="app-version"></span></span>
                 </div>
                 <div class="settings-divider"></div>
-                <div class="settings-item is-button" id="update-check-btn" onclick="checkForOTAUpdates()">
+                <a href="updater.html" class="settings-item is-button" id="update-check-btn" style="text-decoration: none; color: inherit;">
                     <div class="settings-label-wrap">
                         <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        <span class="settings-label">Auf Updates prüfen</span>
+                        <span class="settings-label">Softwareupdate</span>
                     </div>
                     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </div>
+                </a>
             </div>
 
             <h3>Über</h3>
@@ -437,6 +445,7 @@
         setChecked('location-toggle', settings.locationEnabled);
         setChecked('weather-toggle', settings.weatherEnabled);
         setChecked('notifications-toggle', settings.notificationsEnabled);
+        setChecked('autoupdate-toggle', settings.autoUpdateEnabled);
         setValue('username-input', settings.username);
         setValue('depth-slider', settings.depth);
         setValue('radius-slider', settings.customRadius || 18); // Default fallback
@@ -470,6 +479,7 @@
         addListener('location-toggle', 'change', (e) => setFeature('location', e.target.checked));
         addListener('weather-toggle', 'change', (e) => setFeature('weather', e.target.checked));
         addListener('notifications-toggle', 'change', (e) => setFeature('notifications', e.target.checked));
+        addListener('autoupdate-toggle', 'change', (e) => setFeature('autoUpdate', e.target.checked));
         addListener('username-input', 'input', (e) => setUsername(e.target.value));
         addListener('depth-slider', 'input', (e) => set3DDepth(e.target.value));
         addListener('radius-slider', 'input', (e) => setCustomRadius(e.target.value));
