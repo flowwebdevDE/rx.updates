@@ -9,58 +9,91 @@
     <link rel="stylesheet" href="data/styles/dashboard.css">
     <link rel="stylesheet" href="data/styles/global-theme.css">
     <style>
+        /* Status Container (Center) */
+        .update-status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+        .status-icon-large {
+            width: 80px;
+            height: 80px;
+            color: var(--secondary-text-color);
+            margin-bottom: 20px;
+            opacity: 0.5;
+            transition: color 0.3s;
+        }
+        .status-icon-large.success { color: var(--accent-color); opacity: 1; }
+        .status-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        .status-desc { font-size: 15px; color: var(--secondary-text-color); max-width: 300px; line-height: 1.4; }
+
+        /* New Update Card */
         .update-card {
-            border: 2px solid var(--accent-color);
+            background: linear-gradient(135deg, var(--card-background) 0%, var(--background-color) 100%);
+            border: 1px solid var(--accent-color);
             padding: 24px;
             margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        .update-card h2 {
-            font-size: 20px;
-            margin-bottom: 8px;
+        .update-card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--accent-color);
         }
-        .update-card .version-tag {
-            background: var(--accent-bg);
+        .update-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        
+        .version-badge {
+            background: var(--accent-color);
             color: var(--accent-color);
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 16px;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 10px var(--accent-bg);
         }
-        .update-card .changelog {
-            background: var(--background-color);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+        
+        .changelog-box {
+            background: rgba(128, 128, 128, 0.08);
+            padding: 16px;
+            border-radius: 16px;
+            margin: 20px 0;
             white-space: pre-wrap;
             font-family: monospace;
-            font-size: 13px;
-            max-height: 150px;
+            font-size: 13px; line-height: 1.5;
+            max-height: 200px;
             overflow-y: auto;
+            border: 1px solid var(--border-color);
         }
-        .update-card button {
-            width: 100%;
+        
+        /* Version List */
+        .version-list { display: flex; flex-direction: column; gap: 12px; }
+        .version-card {
+            background: var(--card-background);
             padding: 16px;
+            border-radius: var(--card-radius);
+            display: flex; align-items: center; justify-content: space-between;
+            border: 1px solid transparent;
+            transition: transform 0.2s;
         }
-        .version-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
+        .version-card.active {
+            border-color: var(--accent-color);
+            background: var(--accent-bg);
         }
-        .version-item:last-child { border-bottom: none; }
-        .version-info {
-            font-weight: 500;
-        }
-        .version-info .current-tag {
-            font-size: 12px;
-            color: var(--secondary-text-color);
-            margin-left: 8px;
-        }
-        .version-actions button {
-            padding: 6px 14px;
-            font-size: 14px;
+        .v-info { display: flex; flex-direction: column; }
+        .v-title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .v-meta { font-size: 13px; color: var(--secondary-text-color); margin-top: 2px; }
+        
+        .active-tag {
+            font-size: 11px; color: var(--accent-color);
+            background: rgba(255,255,255,0.5);
+            padding: 2px 8px; border-radius: 6px;
         }
     </style>
 </head>
@@ -75,22 +108,27 @@
         </header>
         <main class="content">
 
-            <!-- New Update Section -->
-            <div id="new-update-section" class="card update-card" style="display: none;">
-                <h2>Neues Update verfügbar</h2>
-                <p class="version-tag" id="new-version-number"></p>
-                <div class="changelog" id="new-version-changelog"></div>
-                <button id="install-update-btn" class="btn-primary">Laden & Installieren</button>
+            <!-- Status Container -->
+            <div id="status-container" class="update-status-container">
+                <svg id="status-icon" class="status-icon-large spinning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <div id="status-title" class="status-title">Suche nach Updates...</div>
+                <div id="status-desc" class="status-desc">Bitte warten</div>
+                <button id="check-again-btn" class="btn-secondary" style="margin-top: 20px; display: none;">Erneut prüfen</button>
             </div>
 
-            <!-- Status/Info Section -->
-            <div id="update-status-card" class="card">
-                <p id="update-status-text">Prüfe auf Updates...</p>
+            <!-- New Update Section -->
+            <div id="new-update-card" class="card update-card" style="display: none;">
+                <div class="update-header">
+                    <div><h2 style="margin: 0; font-size: 22px;">Update verfügbar</h2><p style="margin: 5px 0 0 0; opacity: 0.7;">Neue Funktionen & Verbesserungen</p></div>
+                    <div class="version-badge" id="new-version-badge">vX.X.X</div>
+                </div>
+                <div class="changelog-box" id="new-version-changelog"></div>
+                <button id="install-update-btn" class="btn-primary" style="width: 100%; padding: 16px; font-size: 16px;">Jetzt installieren</button>
             </div>
 
             <!-- Installed Versions Section -->
-            <h3>Installierte Versionen</h3>
-            <div id="installed-versions-list" class="settings-group">
+            <h3 style="margin: 30px 0 15px 5px; opacity: 0.6; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Installierte Versionen</h3>
+            <div id="version-list" class="version-list">
                 <!-- JS populates this -->
             </div>
         </main>
@@ -99,36 +137,37 @@
     <script src="data/scripts/theme-manager.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const newUpdateSection = document.getElementById('new-update-section');
-            const statusCard = document.getElementById('update-status-card');
-            const statusText = document.getElementById('update-status-text');
-            const installedList = document.getElementById('installed-versions-list');
+            const newUpdateCard = document.getElementById('new-update-card');
+            const statusContainer = document.getElementById('status-container');
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusDesc = document.getElementById('status-desc');
+            const checkAgainBtn = document.getElementById('check-again-btn');
+            
+            const versionList = document.getElementById('version-list');
             const installBtn = document.getElementById('install-update-btn');
 
             const CapacitorUpdater = window.getCapacitorUpdater();
             let newUpdateData = null;
 
             async function renderInstalledVersions() {
-                installedList.innerHTML = '<div class="version-item">Lade Versionen...</div>';
+                versionList.innerHTML = '';
                 if (!CapacitorUpdater) {
-                    installedList.innerHTML = '<div class="version-item">Updater-Plugin nicht verfügbar.</div>';
+                    versionList.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.6;">Updater-Plugin nicht verfügbar.</div>';
                     return;
                 }
                 try {
                     const list = await CapacitorUpdater.list();
                     const current = await CapacitorUpdater.current();
-                    installedList.innerHTML = '';
 
                     const originalVersionItem = document.createElement('div');
-                    originalVersionItem.className = 'version-item';
+                    originalVersionItem.className = `version-card ${!current.id ? 'active' : ''}`;
                     originalVersionItem.innerHTML = `
-                        <div class="version-info">
-                            Original-Version <span class="app-version"></span>
-                            ${!current.id ? '<span class="current-tag">(Aktiv)</span>' : ''}
+                        <div class="v-info">
+                            <div class="v-title">Original-Version ${!current.id ? '<span class="active-tag">Aktiv</span>' : ''}</div>
+                            <div class="v-meta">Basis-App (v<span class="app-version"></span>)</div>
                         </div>
-                        <div class="version-actions">
-                            ${current.id ? '<button class="btn-secondary">Aktivieren</button>' : ''}
-                        </div>
+                        ${current.id ? '<button class="btn-secondary">Aktivieren</button>' : ''}
                     `;
                     if (current.id) {
                         originalVersionItem.querySelector('button').onclick = async () => {
@@ -136,52 +175,70 @@
                             window.location.reload();
                         };
                     }
-                    installedList.appendChild(originalVersionItem);
+                    versionList.appendChild(originalVersionItem);
 
                     if (!list.versions || list.versions.length === 0) return;
 
                     list.versions.forEach(v => {
                         const isActive = v.id === current.id;
                         const item = document.createElement('div');
-                        item.className = 'version-item';
+                        item.className = `version-card ${isActive ? 'active' : ''}`;
                         item.innerHTML = `
-                            <div class="version-info">
-                                Version ${v.version}
-                                ${isActive ? '<span class="current-tag">(Aktiv)</span>' : ''}
+                            <div class="v-info">
+                                <div class="v-title">Version ${v.version} ${isActive ? '<span class="active-tag">Aktiv</span>' : ''}</div>
+                                <div class="v-meta">Heruntergeladen am ${v.downloaded ? new Date(v.downloaded).toLocaleDateString() : 'Unbekannt'}</div>
                             </div>
-                            <div class="version-actions">
-                                ${!isActive ? '<button class="btn-secondary">Aktivieren</button>' : ''}
-                            </div>
+                            ${!isActive ? '<button class="btn-secondary">Aktivieren</button>' : ''}
                         `;
                         if (!isActive) {
                             item.querySelector('button').onclick = async () => {
-                                item.querySelector('button').textContent = 'Aktiviere...';
+                                item.querySelector('button').textContent = '...';
                                 await CapacitorUpdater.set(v);
                                 window.location.reload();
                             };
                         }
-                        installedList.appendChild(item);
+                        versionList.appendChild(item);
                     });
                 } catch (e) {
-                    installedList.innerHTML = `<div class="version-item" style="color: #ff3b30;">Fehler: ${e.message}</div>`;
+                    versionList.innerHTML = `<div style="padding: 20px; color: #ff3b30;">Fehler: ${e.message}</div>`;
                 }
             }
 
             async function checkForNewUpdate() {
+                statusIcon.classList.add('spinning');
+                statusIcon.innerHTML = '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>'; // Spinner path
+                statusTitle.textContent = 'Suche nach Updates...';
+                statusDesc.textContent = 'Bitte warten';
+                checkAgainBtn.style.display = 'none';
+                newUpdateCard.style.display = 'none';
+                statusContainer.style.display = 'flex';
+
                 try {
                     const updateData = await window.getUpdateInfo();
                     if (updateData) {
                         newUpdateData = updateData;
-                        document.getElementById('new-version-number').textContent = `Version ${updateData.version}`;
+                        document.getElementById('new-version-badge').textContent = `v${updateData.version}`;
                         document.getElementById('new-version-changelog').textContent = updateData.changelog || 'Keine Informationen verfügbar.';
-                        newUpdateSection.style.display = 'block';
-                        statusCard.style.display = 'none';
+                        newUpdateCard.style.display = 'block';
+                        statusContainer.style.display = 'none';
                     } else {
-                        statusText.textContent = 'Deine App ist auf dem neuesten Stand.';
+                        showStatusSuccess('Deine App ist aktuell', 'Es sind keine neuen Updates verfügbar.');
                     }
                 } catch (e) {
-                    statusText.textContent = 'Fehler bei der Update-Prüfung.';
+                    statusIcon.classList.remove('spinning');
+                    statusTitle.textContent = 'Prüfung fehlgeschlagen';
+                    statusDesc.textContent = 'Bitte überprüfe deine Internetverbindung.';
+                    checkAgainBtn.style.display = 'inline-block';
                 }
+            }
+
+            function showStatusSuccess(title, desc) {
+                statusIcon.classList.remove('spinning');
+                statusIcon.classList.add('success');
+                statusIcon.innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'; // Checkmark
+                statusTitle.textContent = title;
+                statusDesc.textContent = desc;
+                checkAgainBtn.style.display = 'inline-block';
             }
 
             installBtn.addEventListener('click', () => {
@@ -190,6 +247,8 @@
                     window.checkForOTAUpdates(false, newUpdateData);
                 }
             });
+            
+            checkAgainBtn.addEventListener('click', checkForNewUpdate);
 
             renderInstalledVersions();
             checkForNewUpdate();
