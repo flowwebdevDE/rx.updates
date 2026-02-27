@@ -522,7 +522,7 @@ function updateLauncherState() {
         console.error("Launcher Crash Protection:", e);
         // Notfall-Modus: Falls was schiefgeht, Launcher-Modus deaktivieren damit man wieder was sieht
         document.body.classList.remove('launcher-mode');
-        alert("Launcher Fehler: " + e.message);
+        if(window.showAppPopup) window.showAppPopup("Launcher Fehler", e.message);
     }
 }
 
@@ -1162,11 +1162,16 @@ function openLauncherSettings() {
     };
     
     document.getElementById('ls-reset-dock').onclick = () => {
-        if(confirm('Dock wirklich zurücksetzen?')) {
+        const doReset = () => {
             const lConfig = window.getLauncherConfig();
             lConfig.dockApps = null; 
             window.setLauncherConfig(lConfig);
             close();
+        };
+        if(window.showAppPopup) {
+            window.showAppPopup('Dock zurücksetzen', 'Möchtest du das Dock wirklich auf die Standardeinstellungen zurücksetzen?', 'Zurücksetzen', doReset);
+        } else {
+            doReset();
         }
     };
 }
@@ -1433,7 +1438,7 @@ function addToHomeScreen(app) {
         if (window.showNotification) {
             window.showNotification('Hinweis', 'App ist bereits auf dem Home Screen');
         } else {
-            alert('App ist bereits auf dem Home Screen');
+            window.showAppPopup('Hinweis', 'App ist bereits auf dem Home Screen');
         }
         return;
     }
@@ -1489,7 +1494,7 @@ function renderToggleInternal(container) {
         if (window.showAppPopup) {
             window.showAppPopup('Launcher Debug', msg);
         } else {
-            alert(msg);
+            console.log(msg);
         }
     };
     container.appendChild(debugBtn);

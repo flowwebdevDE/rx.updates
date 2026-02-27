@@ -418,18 +418,6 @@
         <button onclick="submitPremiumCode()" style="width: 100%; padding: 16px; background: var(--accent-color); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 16px;">Freischalten</button>
     </div>
 
-    <!-- Generic Message Popup -->
-    <div id="message-popup" class="popup-content" style="max-height: auto;">
-        <div class="popup-header">
-            <h2 class="popup-title" id="msg-title">Nachricht</h2>
-            <button class="popup-close" onclick="closeAllPopups()">✕</button>
-        </div>
-        <p id="msg-body" style="font-size: 16px; line-height: 1.5; color: var(--text-color); margin: 10px 0 20px 0; white-space: pre-wrap;"></p>
-        <div id="msg-actions" style="display: flex; flex-direction: column; gap: 10px;">
-            <button id="msg-action-btn" style="width: 100%; padding: 16px; background: var(--accent-color); color: white; border: none; border-radius: 14px; font-weight: 600; font-size: 16px; display: none;">Aktion</button>
-            <button id="msg-close-btn" onclick="closeAllPopups()" style="width: 100%; padding: 16px; background: var(--button-secondary-bg); color: var(--text-color); border: none; border-radius: 14px; font-weight: 600; font-size: 16px;">Schließen</button>
-        </div>
-    </div>
 
     <script src="data/scripts/theme-manager.js"></script>
     <script>
@@ -550,26 +538,6 @@
 
         overlay.addEventListener('click', closeAllPopups);
 
-        // Global Popup Handler for theme-manager.js
-        window.showAppPopup = function(title, message, actionText, actionCallback) {
-            document.getElementById('msg-title').textContent = title;
-            document.getElementById('msg-body').textContent = message;
-            
-            const actionBtn = document.getElementById('msg-action-btn');
-            const closeBtn = document.getElementById('msg-close-btn');
-            
-            if (actionText && actionCallback) {
-                actionBtn.textContent = actionText;
-                actionBtn.style.display = 'block';
-                actionBtn.onclick = () => { actionCallback(); closeAllPopups(); };
-                closeBtn.textContent = 'Abbrechen';
-                closeBtn.style.display = 'block';
-            } else {
-                actionBtn.style.display = 'none';
-                closeBtn.textContent = 'OK'; // Fallback zu OK wenn keine Aktion
-            }
-            openPopup('message-popup');
-        };
 
         function selectDesign(design) { 
             setDesign(design); 

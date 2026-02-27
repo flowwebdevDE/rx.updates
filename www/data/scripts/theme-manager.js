@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.7';
+    const APP_VERSION = '3.4.8';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -752,14 +752,12 @@
                 window.location.reload();
             } catch(e) {
                 if (window.showAppPopup) window.showAppPopup('Fehler', e.message);
-                else alert(e.message);
+                else console.error(e);
             }
         };
 
         if (window.showAppPopup) {
             window.showAppPopup('Updates zurücksetzen', msg, 'Speicher freigeben', doReset);
-        } else if (confirm(msg)) {
-            doReset();
         }
     };
 
@@ -921,7 +919,7 @@
         const text = logBuffer.map(e => `[${e.ts.toLocaleTimeString()}] [${e.type.toUpperCase()}] ${e.args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')}`).join('\n');
         navigator.clipboard.writeText(text).then(() => {
             if (window.showNotification) window.showNotification('Dev Console', 'Logs kopiert!', null, 1500, true);
-            else alert('Logs kopiert');
+            else window.showAppPopup('Info', 'Logs in die Zwischenablage kopiert.');
         });
     };
 
@@ -940,4 +938,66 @@
             btn.remove();
         }
     }
+
+    // =========================================
+    // GLOBAL POPUP SYSTEM (Replaces Native Alerts)
+    // =========================================
+    window.showAppPopup = function(title, message, actionText, actionCallback, cancelText = 'Schließen') {
+        let overlay = document.getElementById('global-popup-overlay');
+        
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'global-popup-overlay';
+            overlay.className = 'popup-overlay';
+            overlay.innerHTML = `
+                <div class="popup-content" id="global-popup-content">
+                    <div class="popup-header">
+                        <h2 class="popup-title"></h2>
+                        <button class="popup-close">✕</button>
+                    </div>
+                    <p class="popup-message" style="font-size: 16px; line-height: 1.5; color: var(--text-color); margin: 10px 0 20px 0; white-space: pre-wrap;"></p>
+                    <div class="popup-actions" style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn-primary popup-action-btn" style="width: 100%;"></button>
+                        <button class="btn-secondary popup-cancel-btn" style="width: 100%;"></button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            // Close handlers
+            const close = () => overlay.classList.remove('active');
+            overlay.querySelector('.popup-close').onclick = close;
+            overlay.querySelector('.popup-cancel-btn').onclick = close;
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) close();
+            });
+        }
+        
+        const titleEl = overlay.querySelector('.popup-title');
+        const msgEl = overlay.querySelector('.popup-message');
+        const actionBtn = overlay.querySelector('.popup-action-btn');
+        const cancelBtn = overlay.querySelector('.popup-cancel-btn');
+        
+        titleEl.textContent = title || 'Hinweis';
+        msgEl.textContent = message || '';
+        cancelBtn.textContent = cancelText;
+        
+        if (actionText && actionCallback) {
+            actionBtn.style.display = 'flex';
+            actionBtn.textContent = actionText;
+            actionBtn.onclick = () => {
+                actionCallback();
+                overlay.classList.remove('active');
+            };
+        } else {
+            actionBtn.style.display = 'none';
+            cancelBtn.textContent = 'OK';
+        }
+        
+        // Show
+        overlay.classList.add('active');
+        const content = overlay.querySelector('.popup-content');
+        // Reset transform for animation
+        content.style.transform = 'translateX(-50%) translateY(0)';
+    };
 })();

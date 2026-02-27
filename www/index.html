@@ -289,7 +289,7 @@
                     window.Capacitor.Plugins.AppLauncher.openCamera();
                 } else {
                     console.warn('Native Kamera-Funktion (AppLauncher.openCamera) nicht gefunden.');
-                    alert('Diese Funktion ist nur in der nativen App verfügbar.');
+                    window.showAppPopup('Info', 'Diese Funktion ist nur in der nativen App verfügbar.');
                 }
             });
         }
