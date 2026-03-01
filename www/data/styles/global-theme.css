@@ -1,4 +1,8 @@
 /* Global Theme Variables & Overrides */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
 :root {
     /* Default Colors (Blue / Rail Explorer) */
     --accent-color: #0a3d91;
