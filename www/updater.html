@@ -190,6 +190,13 @@
                         </div>
                         ${current.id ? '<button class="btn-secondary">Aktivieren</button>' : ''}
                     `;
+                    
+                    // Version manuell setzen, da dynamisch erzeugt
+                    if(window.getAppVersion) {
+                        const vSpan = originalVersionItem.querySelector('.app-version');
+                        if(vSpan) vSpan.textContent = window.getAppVersion();
+                    }
+
                     if (current.id) {
                         originalVersionItem.querySelector('button').onclick = async () => {
                             await CapacitorUpdater.reset();
@@ -240,7 +247,7 @@
                     
                     // 1. Check Stable Update
                     // Wir nutzen window.rxCompareVersions aus theme-manager.js
-                    const currentVer = document.querySelector('.app-version').textContent;
+                    const currentVer = window.getAppVersion ? window.getAppVersion() : '0.0.0';
                     
                     if (window.rxCompareVersions(manifest.version, currentVer) > 0) {
                         newUpdateData = manifest;
@@ -255,14 +262,22 @@
                     // 2. Check Beta
                     if (manifest.beta) {
                         betaSection.style.display = 'block';
+                        const isBetaInstalled = manifest.beta.version === currentVer;
                         const betaCard = document.getElementById('beta-card-content');
+                        
+                        let betaBtn = `<button class="btn-secondary" style="width:100%; color:#ff9500;" onclick='installCustom("${manifest.beta.url}", "${manifest.beta.version}", ${JSON.stringify(manifest.beta.changelog || "")})'>Beta Installieren</button>`;
+                        
+                        if (isBetaInstalled) {
+                            betaBtn = `<button class="btn-secondary" disabled style="width:100%; opacity:0.6; cursor:default;">Bereits installiert</button>`;
+                        }
+
                         betaCard.innerHTML = `
                             <div class="update-header">
                                 <div><h2 style="margin: 0; font-size: 20px; color: #ff9500;">Beta ${manifest.beta.version}</h2></div>
                                 <div class="version-badge" style="background:#ff9500;">BETA</div>
                             </div>
                             <div class="changelog-box" style="border-color: #ff9500;">${manifest.beta.changelog || 'Keine Infos'}</div>
-                            <button class="btn-secondary" style="width:100%; color:#ff9500;" onclick='installCustom("${manifest.beta.url}", "${manifest.beta.version}", ${JSON.stringify(manifest.beta.changelog || "")})'>Beta Installieren</button>
+                            ${betaBtn}
                         `;
                     }
 
@@ -273,18 +288,25 @@
                             // Überspringe die allerneueste, wenn sie schon oben als "Update verfügbar" angezeigt wird
                             if (newUpdateData && rel.version === newUpdateData.version) return;
 
+                            const isInstalled = rel.version === currentVer;
                             const item = document.createElement('div');
                             item.className = 'version-card';
+                            
+                            let actionBtn = `<button class="btn-secondary">Laden</button>`;
+                            if (isInstalled) {
+                                actionBtn = `<button class="btn-secondary" disabled style="opacity:0.5; cursor:default;">Installiert</button>`;
+                            }
+
                             item.innerHTML = `
                                 <div class="v-info">
                                     <div class="v-title">v${rel.version}</div>
                                     <div class="v-meta">Release</div>
                                 </div>
-                                <button class="btn-secondary">Laden</button>
+                                ${actionBtn}
                             `;
-                            item.querySelector('button').onclick = () => {
-                                installCustom(rel.url, rel.version, rel.changelog);
-                            };
+                            if (!isInstalled) {
+                                item.querySelector('button').onclick = () => installCustom(rel.url, rel.version, rel.changelog);
+                            }
                             serverList.appendChild(item);
                         });
                     }

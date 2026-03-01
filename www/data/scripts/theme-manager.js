@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.5';
+    const APP_VERSION = '3.5.1';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -347,7 +347,7 @@
 
     window.resetCustomWallpaper = function() {
         const msg = 'Möchtest du das eigene Hintergrundbild entfernen und zum Standard-Design zurückkehren?';
-        window.showAppPopup('Hintergrund zurücksetzen', msg, 'Entfernen', () => setCustomWallpaper(null));
+        window.showAppPopup('Hintergrund zurücksetzen', msg, 'Entfernen', () => window.setCustomWallpaper(null));
     };
 
     window.setUsername = function(name) {
@@ -459,6 +459,7 @@
             customWallpaper: localStorage.getItem(WALLPAPER_KEY),
             isPremium: localStorage.getItem(PREMIUM_KEY) === 'true'
         };
+        return _settingsCache;
     };
 
     // Helper für korrekten Versionsvergleich (z.B. 3.10 > 3.9)
@@ -1021,4 +1022,66 @@
             btn.remove();
         }
     }
+
+    // =========================================
+    // GLOBAL POPUP SYSTEM (Replaces Native Alerts)
+    // =========================================
+    window.showAppPopup = function(title, message, actionText, actionCallback, cancelText = 'Schließen') {
+        let overlay = document.getElementById('global-popup-overlay');
+        
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'global-popup-overlay';
+            overlay.className = 'popup-overlay';
+            overlay.innerHTML = `
+                <div class="popup-content" id="global-popup-content">
+                    <div class="popup-header">
+                        <h2 class="popup-title"></h2>
+                        <button class="popup-close">✕</button>
+                    </div>
+                    <p class="popup-message" style="font-size: 16px; line-height: 1.5; color: var(--text-color); margin: 10px 0 20px 0; white-space: pre-wrap;"></p>
+                    <div class="popup-actions" style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn-primary popup-action-btn" style="width: 100%;"></button>
+                        <button class="btn-secondary popup-cancel-btn" style="width: 100%;"></button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            
+            // Close handlers
+            const close = () => overlay.classList.remove('active');
+            overlay.querySelector('.popup-close').onclick = close;
+            overlay.querySelector('.popup-cancel-btn').onclick = close;
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) close();
+            });
+        }
+        
+        const titleEl = overlay.querySelector('.popup-title');
+        const msgEl = overlay.querySelector('.popup-message');
+        const actionBtn = overlay.querySelector('.popup-action-btn');
+        const cancelBtn = overlay.querySelector('.popup-cancel-btn');
+        
+        titleEl.textContent = title || 'Hinweis';
+        msgEl.textContent = message || '';
+        cancelBtn.textContent = cancelText;
+        
+        if (actionText && actionCallback) {
+            actionBtn.style.display = 'flex';
+            actionBtn.textContent = actionText;
+            actionBtn.onclick = () => {
+                actionCallback();
+                overlay.classList.remove('active');
+            };
+        } else {
+            actionBtn.style.display = 'none';
+            cancelBtn.textContent = 'OK';
+        }
+        
+        // Show
+        overlay.classList.add('active');
+        const content = overlay.querySelector('.popup-content');
+        // Reset transform for animation
+        content.style.transform = 'translateX(-50%) translateY(0)';
+    };
 })();
