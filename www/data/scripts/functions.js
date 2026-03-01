@@ -594,12 +594,12 @@ calcBtn.addEventListener('click', async () => {
       }
 
       html += `
-        <div class="station-row">
+        <div class="station-row animate-in" style="animation-delay: ${i * 0.1}s">
             <div class="station-dot start"></div>
             <div class="station-name">${s.from}${startPlatformHtml}</div>
         </div>
         
-        <div class="connection-row segment-item" data-index="${i}">
+        <div class="connection-row segment-item animate-in" data-index="${i}" style="animation-delay: ${i * 0.1 + 0.05}s">
             <div class="connection-line"></div>
             <div class="connection-card">
                 <div class="stats-grid">
@@ -630,7 +630,7 @@ calcBtn.addEventListener('click', async () => {
         </div>
 
         ${i === res.segments.length - 1 ? `
-        <div class="station-row">
+        <div class="station-row animate-in" style="animation-delay: ${i * 0.1 + 0.1}s">
             <div class="station-dot end"></div>
             <div class="station-name">${s.to}${endPlatformHtml}</div>
         </div>` : ''}

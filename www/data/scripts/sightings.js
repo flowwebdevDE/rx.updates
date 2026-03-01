@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             groupsList.innerHTML = '<p style="padding:20px; text-align:center; color:gray;">Keine Gruppen gefunden.</p>';
             return;
         }
-        filtered.forEach(group => {
+        filtered.forEach((group, index) => {
             // Zeit formatieren
             let timeDisplay = '';
             if (group.lastMessageTime) {
@@ -218,6 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const div = document.createElement('div');
             div.className = 'group-item';
+            div.classList.add('animate-in');
+            div.style.animationDelay = `${index * 0.05}s`;
             div.innerHTML = `
                 <div class="group-icon">
                     ${group.name.substring(0,2).toUpperCase()}
@@ -641,6 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sightingDiv = document.createElement('div');
         
+        // Animation bei erstem Laden
+        if (isFirstLoad) {
+            sightingDiv.classList.add('animate-in');
+        }
+
         // Unterscheidung: Eigene vs. Fremde Nachricht
         const isOwn = sighting.userId === userId;
         sightingDiv.className = `sighting ${isOwn ? 'own' : 'other'}`;

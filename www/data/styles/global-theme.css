@@ -1201,3 +1201,8 @@ body.design-pink #status-notification .sn-progress-bar {
 .animate-stagger > *:nth-child(4) { animation-delay: 0.2s; }
 .animate-stagger > *:nth-child(5) { animation-delay: 0.25s; }
 .animate-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+.animate-in {
+    opacity: 0;
+    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

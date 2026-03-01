@@ -276,13 +276,13 @@
     <div class="app">
         <header class="header">
             <a href="index.html" class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </a>
             <h1>Suche</h1>
             <p>Betriebsstellen finden</p>
         </header>
 
-        <main class="content" id="main-content">
+        <main class="content animate-stagger" id="main-content">
             <div class="card">
                 <div class="form">
                     <div class="search-container">
@@ -481,7 +481,7 @@
                 resultsList.innerHTML = '<li style="justify-content: center; color: var(--secondary-text-color); cursor: default;">Keine Bahnhöfe gefunden.</li>';
                 return;
             }
-
+            let i = 0;
             for (const s of filtered.slice(0, 100)) {
                 const name = s.tags.name || 'Unbenannt';
                 const ref = s.tags["railway:ref"] ? s.tags["railway:ref"].toUpperCase() : null;
@@ -497,6 +497,8 @@
                 }
 
                 const li = document.createElement('li');
+                li.className = 'animate-in';
+                li.style.animationDelay = `${i++ * 0.03}s`;
                 li.innerHTML = `
                     <div class="result-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>
