@@ -1,7 +1,7 @@
 {
   "version": "3.5",
   "changelog": "✨ Neues Update verfügbar!\n\n- Performance Optimierungen\n- Fehlerbehebungen\n- Neue Features",
-  "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5/update.zip",
+  "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5/dist.zip",
   "beta": {
     "version": "3.6.0-beta.1",
     "changelog": "🧪 Beta-Version\n\n- Experimentelle Funktionen\n- Nutzung auf eigene Gefahr!",
