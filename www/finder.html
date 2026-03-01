@@ -743,7 +743,7 @@
 
         // === Start ===
         setTimeout(async () => {
-            await loadStations(); 
+            loadStations(); // Async starten, nicht warten
             // Check settings before auto-starting
             if (window.getSettings) {
                 const settings = window.getSettings();

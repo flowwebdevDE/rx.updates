@@ -444,7 +444,7 @@ userInput.addEventListener('keypress',e=>{
 // -----------------------------
 // 🟢 Start
 // -----------------------------
-loadStations();
+setTimeout(loadStations, 100);
 
 // Hinweis: kein await außerhalb async-Funktionen mehr nötig
 // Mini-Map wird nur innerhalb von handleUserMessage() erzeugt

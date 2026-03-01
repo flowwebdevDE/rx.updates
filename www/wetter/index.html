@@ -380,7 +380,9 @@
                 stations = data.elements || [];
             } catch (e) { console.warn('Stations load failed', e); }
         }
-        loadStations();
+        
+        // Verzögertes Laden für Performance
+        setTimeout(loadStations, 200);
 
         // 2. Suche ausführen
         searchBox.addEventListener('input', (e) => {

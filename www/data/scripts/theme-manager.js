@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.9';
+    const APP_VERSION = '3.4.10';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -8,6 +8,7 @@
     const FEAT_WEATHER_KEY = 'rx_feat_weather';
     const FEAT_LOCATION_KEY = 'rx_feat_location';
     const FEAT_NOTIFICATIONS_KEY = 'rx_feat_notifications';
+    const FEAT_AUTO_UPDATE_KEY = 'rx_feat_auto_update';
     const FEAT_LAUNCHER_KEY = 'rx_feat_launcher';
     const LAUNCHER_CONFIG_KEY = 'rx_launcher_config';
     const LAUNCHER_APPS_KEY = 'rx_launcher_apps';
@@ -19,6 +20,9 @@
     const FONT_KEY = 'rx_custom_font';
     const PREMIUM_KEY = 'rx_is_premium';
     const PREMIUM_CODE = 'premium'; // Der Code für Premium
+
+    // Cache für Settings, um localStorage Zugriffe zu minimieren
+    let _settingsCache = null;
 
     function applySettings() {
         const isTablet = window.innerWidth >= 768;
@@ -33,6 +37,7 @@
         const weatherEnabled = localStorage.getItem(FEAT_WEATHER_KEY) !== 'false'; // Standard: an
         const locationEnabled = localStorage.getItem(FEAT_LOCATION_KEY) !== 'false'; // Standard: an
         const notificationsEnabled = localStorage.getItem(FEAT_NOTIFICATIONS_KEY) !== 'false'; // Standard: an
+        const autoUpdateEnabled = localStorage.getItem(FEAT_AUTO_UPDATE_KEY) !== 'false'; // Standard: an
         const launcherEnabled = localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true'; // Standard: aus
         const accent = localStorage.getItem(ACCENT_KEY) || 'blue';
         const depth = parseInt(localStorage.getItem(DEPTH_KEY) || '0');
@@ -254,9 +259,10 @@
 
         // Event feuern für UI-Updates (z.B. in index.html)
         window.dispatchEvent(new CustomEvent('rx-settings-changed', { 
-            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth, customRadius, customFont, customWallpaper, isPremium } 
+            detail: { design, darkMode, weatherEnabled, locationEnabled, notificationsEnabled, autoUpdateEnabled, launcherEnabled, accent: (pinkMode ? 'pink' : accent), pinkMode, devMode, depth, customRadius, customFont, customWallpaper, isPremium } 
         }));
 
+        _settingsCache = null; // Cache invalidieren bei Änderungen
         updateDevTrigger(devMode);
     }
 
@@ -265,22 +271,26 @@
         // 'pink' nicht als Basis-Design speichern
         if (designName !== 'pink') {
             localStorage.setItem(DESIGN_KEY, designName);
+            _settingsCache = null;
         }
         applySettings();
     };
 
     window.setDarkMode = function(enable) {
         localStorage.setItem(DARKMODE_KEY, enable);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setPinkMode = function(enable) {
         localStorage.setItem(PINKMODE_KEY, enable);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setDevMode = function(enable) {
         localStorage.setItem(DEV_MODE_KEY, enable);
+        _settingsCache = null;
         applySettings();
     };
 
@@ -288,38 +298,46 @@
         if (feature === 'weather') localStorage.setItem(FEAT_WEATHER_KEY, enable);
         if (feature === 'location') localStorage.setItem(FEAT_LOCATION_KEY, enable);
         if (feature === 'notifications') localStorage.setItem(FEAT_NOTIFICATIONS_KEY, enable);
+        if (feature === 'autoUpdate') localStorage.setItem(FEAT_AUTO_UPDATE_KEY, enable);
         if (feature === 'launcher') localStorage.setItem(FEAT_LAUNCHER_KEY, enable);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setAccent = function(color) {
         localStorage.setItem(ACCENT_KEY, color);
+        _settingsCache = null;
         applySettings();
     };
 
     window.set3DDepth = function(value) {
         localStorage.setItem(DEPTH_KEY, value);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setCustomRadius = function(value) {
         localStorage.setItem(RADIUS_KEY, value);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setCustomFont = function(value) {
         localStorage.setItem(FONT_KEY, value);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setCustomWallpaper = function(dataUrl) {
         if(dataUrl) localStorage.setItem(WALLPAPER_KEY, dataUrl);
         else localStorage.removeItem(WALLPAPER_KEY);
+        _settingsCache = null;
         applySettings();
     };
 
     window.setPremiumStatus = function(active) {
         localStorage.setItem(PREMIUM_KEY, active);
+        _settingsCache = null;
         applySettings();
     };
 
@@ -329,19 +347,17 @@
 
     window.resetCustomWallpaper = function() {
         const msg = 'Möchtest du das eigene Hintergrundbild entfernen und zum Standard-Design zurückkehren?';
-        if (window.showAppPopup) {
-            window.showAppPopup('Hintergrund zurücksetzen', msg, 'Entfernen', () => setCustomWallpaper(null));
-        } else if (confirm(msg)) {
-            setCustomWallpaper(null);
-        }
+        window.showAppPopup('Hintergrund zurücksetzen', msg, 'Entfernen', () => setCustomWallpaper(null));
     };
 
     window.setUsername = function(name) {
         localStorage.setItem(USERNAME_KEY, name);
+        _settingsCache = null;
     };
     
     window.setLauncherApps = function(apps) {
         localStorage.setItem(LAUNCHER_APPS_KEY, JSON.stringify(apps));
+        _settingsCache = null;
         // Trigger update without full reload
         applySettings();
     };
@@ -359,20 +375,12 @@
              window.location.reload();
         };
 
-        if (window.showAppPopup) {
-            window.showAppPopup('App zurücksetzen', msg, 'Zurücksetzen', doReset);
-        } else if (confirm(msg)) {
-            doReset();
-        }
+        window.showAppPopup('App zurücksetzen', msg, 'Zurücksetzen', doReset);
     };
 
     window.showDeviceInfo = function() {
         const info = `User Agent: ${navigator.userAgent}\nPlatform: ${navigator.platform}\nScreen: ${window.screen.width}x${window.screen.height}\nPixel Ratio: ${window.devicePixelRatio}`;
-        if (window.showAppPopup) {
-            window.showAppPopup('Geräte-Infos', info);
-        } else {
-            alert(info);
-        }
+        window.showAppPopup('Geräte-Infos', info);
     };
 
     window.testSplash = function() {
@@ -397,8 +405,7 @@
             const key = localStorage.key(i);
             content += `<b>${key}:</b><br><span style="font-family:monospace; font-size:12px; color:var(--secondary-text-color);">${localStorage.getItem(key)}</span><br><br>`;
         }
-        if (window.showAppPopup) window.showAppPopup('LocalStorage', content || 'Leer');
-        else alert(content || 'Leer');
+        window.showAppPopup('LocalStorage', content || 'Leer');
     };
 
     window.getLauncherConfig = function() {
@@ -431,7 +438,9 @@
     };
 
     window.getSettings = function() {
-        return {
+        if (_settingsCache) return _settingsCache;
+        
+        _settingsCache = {
             design: localStorage.getItem(DESIGN_KEY) || 'standard',
             darkMode: localStorage.getItem(DARKMODE_KEY) === 'true',
             pinkMode: localStorage.getItem(PINKMODE_KEY) === 'true',
@@ -439,6 +448,7 @@
             weatherEnabled: localStorage.getItem(FEAT_WEATHER_KEY) !== 'false',
             locationEnabled: localStorage.getItem(FEAT_LOCATION_KEY) !== 'false',
             notificationsEnabled: localStorage.getItem(FEAT_NOTIFICATIONS_KEY) !== 'false',
+            autoUpdateEnabled: localStorage.getItem(FEAT_AUTO_UPDATE_KEY) !== 'false',
             launcherEnabled: localStorage.getItem(FEAT_LAUNCHER_KEY) === 'true',
             launcherApps: JSON.parse(localStorage.getItem(LAUNCHER_APPS_KEY) || '[]'),
             accent: localStorage.getItem(ACCENT_KEY) || 'blue',
@@ -451,59 +461,28 @@
         };
     };
 
-    // Helper für korrekten Versionsvergleich (z.B. 3.10 > 3.9)
-    function compareVersions(v1, v2) {
-        const p1 = String(v1).split('.').map(Number);
-        const p2 = String(v2).split('.').map(Number);
-        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
-            const n1 = p1[i] || 0;
-            const n2 = p2[i] || 0;
-            if (n1 > n2) return 1;
-            if (n1 < n2) return -1;
-        }
-        return 0;
-    }
-
-    // Holt nur die Update-Infos vom Server
-    window.getUpdateInfo = async function() {
-        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
-        const CURRENT_VERSION = APP_VERSION;
-        
-        // Timeout Controller (bricht nach 8s ab, damit es nicht endlos lädt)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-        try {
-            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime(), { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
-            const data = await response.json();
-            
-            // Korrekter numerischer Vergleich
-            if (compareVersions(data.version, CURRENT_VERSION) > 0) {
-                return data; // Update-Daten zurückgeben
-            }
-            return null; // Kein Update
-        } catch (e) {
-            clearTimeout(timeoutId);
-            console.warn('OTA Check failed:', e);
-            throw e; // Fehler weitergeben, damit die UI ihn behandeln kann
-        }
-    };
-
     // OTA Update Logic
-    window.checkForOTAUpdates = async function(isSilent = false, preloadedData = null) {
+    window.checkForOTAUpdates = async function(isSilent = false) {
         const btnText = document.querySelector('#update-check-btn span:first-child');
         const originalText = btnText ? btnText.textContent : 'Nach Updates suchen';
-
-        if(btnText) btnText.textContent = 'Prüfe...';
+        
+        // HIER ANPASSEN: Deine GitHub Raw URL
+        // Die URL muss auf eine version.json zeigen.
+        // Für Plugin-Updates muss 'url' im JSON auf eine ZIP-Datei mit dem 'www'-Ordner zeigen!
+        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
+        const CURRENT_VERSION = APP_VERSION; 
+        
+        if(!isSilent && btnText) btnText.textContent = 'Prüfe...';
 
         try {
-            // Wenn keine Daten vorab geladen wurden, jetzt fetchen
-            const data = preloadedData || await window.getUpdateInfo();
-
-            if (data) {
+            // Cache-Busting
+            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+            
+            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
+            
+            const data = await response.json();
+            
+            if (data.version > CURRENT_VERSION) {
                 const performUpdate = async () => {
                     // Prüfen ob es sich um eine APK handelt (dann immer Browser nutzen)
                     const isApk = data.url && data.url.toLowerCase().endsWith('.apk');
@@ -512,11 +491,11 @@
                     const CapacitorUpdater = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
                     
                     if (CapacitorUpdater && !isApk) {
-                        console.log(`Starte Download von: ${data.url}`);
-                        if(btnText) btnText.textContent = 'Lade...';
+                        if(!isSilent) console.log(`Starte Download von: ${data.url}`);
+                        if(!isSilent && btnText) btnText.textContent = 'Lade...';
                         
                         // Initial Notification
-                        if (window.showNotification) {
+                        if (!isSilent && window.showNotification) {
                             window.showNotification(
                                 'Update wird geladen', 
                                 'Starte Download...', 
@@ -544,7 +523,7 @@
                             // Progress Listener registrieren
                             try {
                                 progressListener = await CapacitorUpdater.addListener('download', (info) => {
-                                    if (window.showNotification && info.percent) {
+                                    if (!isSilent && window.showNotification && info.percent) {
                                         window.showNotification(
                                             'Update wird geladen', 
                                             `Fortschritt: ${Math.round(info.percent)}%`, 
@@ -575,9 +554,9 @@
                             }
 
                             // 2. Installieren
-                            if(btnText) btnText.textContent = 'Installiere...';
+                            if(!isSilent && btnText) btnText.textContent = 'Installiere...';
                             
-                            if (window.showNotification) {
+                            if (!isSilent && window.showNotification) {
                                 window.showNotification(
                                     'Installiere Update', 
                                     'App wird neu gestartet...', 
@@ -618,7 +597,7 @@
                             console.error(err);
                             if (progressListener) progressListener.remove();
                             
-                            if (window.showNotification) {
+                            if (!isSilent && window.showNotification) {
                                 window.showNotification(
                                     'Update fehlgeschlagen', 
                                     'Tippe für Details', 
@@ -632,32 +611,32 @@
                             const errorDetails = (err.message || JSON.stringify(err)).substring(0, 150);
                             const msg = `Der automatische Download ist fehlgeschlagen.\n\nGrund: ${errorDetails}\n\nMöchtest du die Datei manuell herunterladen?`;
                             
-                            if (window.showAppPopup) {
+                            if (!isSilent) {
                                 window.showAppPopup('Update fehlgeschlagen', msg, 'Im Browser öffnen', () => window.open(data.url, '_system'));
-                            } else {
-                                if(confirm(msg)) window.open(data.url, '_system');
                             }
                             
-                            if(btnText) btnText.textContent = originalText;
+                            if(!isSilent && btnText) btnText.textContent = originalText;
                         }
                     } else {
                         // Fallback: Browser (z.B. für APK)
-                        window.open(data.url, '_system');
+                        if (!isSilent) window.open(data.url, '_system');
                     }
                 };
 
-                if (window.showAppPopup) {
+                if (isSilent) {
+                    // Automatisch installieren ohne Nachfrage
+                    performUpdate();
+                } else {
                     window.showAppPopup(
                         'Update verfügbar', 
                         `Version ${data.version} ist verfügbar.\n\nNeuerungen:\n${data.changelog}`,
                         'Jetzt aktualisieren',
                         performUpdate
                     );
-                } else {
-                    if(confirm(`Update verfügbar: ${data.version}\n\nInstallieren?`)) performUpdate();
                 }
             } else {
-                if (window.showNotification) {
+                // Nur Feedback geben, wenn nicht silent
+                if (!isSilent && window.showNotification) {
                     window.showNotification('System', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`, null, 4000, true);
                 } else if (window.showAppPopup) {
                      window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`);
@@ -665,12 +644,12 @@
             }
         } catch (e) {
             console.warn('OTA Check failed:', e);
-            if (window.showAppPopup) {
+            if (!isSilent && window.showAppPopup) {
                 window.showAppPopup('Fehler', 'Konnte nicht nach Updates suchen. Bitte prüfe deine Internetverbindung.');
             }
         } finally {
             // Text nur zurücksetzen, wenn wir nicht gerade laden
-            if(btnText && btnText.textContent === 'Prüfe...') btnText.textContent = originalText;
+            if(!isSilent && btnText && btnText.textContent === 'Prüfe...') btnText.textContent = originalText;
         }
     };
 
@@ -691,6 +670,14 @@
         document.querySelectorAll('.app-version').forEach(el => {
             el.textContent = APP_VERSION;
         });
+
+        // Auto Update Check (Einmal pro Session)
+        if (window.getSettings().autoUpdateEnabled && !sessionStorage.getItem('rx_update_checked')) {
+            sessionStorage.setItem('rx_update_checked', 'true');
+            setTimeout(() => {
+                window.checkForOTAUpdates(true); // Silent check
+            }, 2000);
+        }
     });
 
     // =========================================
@@ -759,10 +746,52 @@
         }
     };
 
-    // Helper, um das Plugin-Objekt sicher abzurufen
-    window.getCapacitorUpdater = function() {
-        return (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
+    // =========================================
+    // FAST GEOLOCATION (Native Bridge)
+    // =========================================
+    let pendingGeoPromise = null;
+
+    window.rxGetPosition = async function(options = {}) {
+        if (pendingGeoPromise) return pendingGeoPromise;
+
+        // Standard-Optionen für schnelle Ergebnisse
+        const opts = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 60000, // Ergebnisse bis zu 60s alt akzeptieren (extrem schnell)
+            ...options
+        };
+
+        const promise = (async () => {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
+                try {
+                    // Native Schnittstelle nutzen
+                    return await window.Capacitor.Plugins.Geolocation.getCurrentPosition(opts);
+                } catch (e) {
+                    console.warn('Native Geo failed, falling back to web', e);
+                }
+            }
+            
+            // Fallback auf Web API
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
+                navigator.geolocation.getCurrentPosition(resolve, reject, opts);
+            });
+        })();
+
+        pendingGeoPromise = promise;
+        promise.finally(() => { pendingGeoPromise = null; });
+        return promise;
     };
+
+    // Polyfill: Überschreibe navigator.geolocation für alle Skripte (z.B. Wetter)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition = function(success, error, options) {
+            window.rxGetPosition(options)
+                .then(pos => success(pos))
+                .catch(err => error && error(err));
+        };
+    }
 
     window.resetUpdates = async function() {
         const CapacitorUpdater = (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
@@ -775,12 +804,14 @@
                 window.location.reload();
             } catch(e) {
                 if (window.showAppPopup) window.showAppPopup('Fehler', e.message);
-                else console.error(e);
+                else alert(e.message);
             }
         };
 
         if (window.showAppPopup) {
             window.showAppPopup('Updates zurücksetzen', msg, 'Speicher freigeben', doReset);
+        } else if (confirm(msg)) {
+            doReset();
         }
     };
 
@@ -942,7 +973,7 @@
         const text = logBuffer.map(e => `[${e.ts.toLocaleTimeString()}] [${e.type.toUpperCase()}] ${e.args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')}`).join('\n');
         navigator.clipboard.writeText(text).then(() => {
             if (window.showNotification) window.showNotification('Dev Console', 'Logs kopiert!', null, 1500, true);
-            else window.showAppPopup('Info', 'Logs in die Zwischenablage kopiert.');
+            else alert('Logs kopiert');
         });
     };
 
@@ -961,66 +992,4 @@
             btn.remove();
         }
     }
-
-    // =========================================
-    // GLOBAL POPUP SYSTEM (Replaces Native Alerts)
-    // =========================================
-    window.showAppPopup = function(title, message, actionText, actionCallback, cancelText = 'Schließen') {
-        let overlay = document.getElementById('global-popup-overlay');
-        
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'global-popup-overlay';
-            overlay.className = 'popup-overlay';
-            overlay.innerHTML = `
-                <div class="popup-content" id="global-popup-content">
-                    <div class="popup-header">
-                        <h2 class="popup-title"></h2>
-                        <button class="popup-close">✕</button>
-                    </div>
-                    <p class="popup-message" style="font-size: 16px; line-height: 1.5; color: var(--text-color); margin: 10px 0 20px 0; white-space: pre-wrap;"></p>
-                    <div class="popup-actions" style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn-primary popup-action-btn" style="width: 100%;"></button>
-                        <button class="btn-secondary popup-cancel-btn" style="width: 100%;"></button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            
-            // Close handlers
-            const close = () => overlay.classList.remove('active');
-            overlay.querySelector('.popup-close').onclick = close;
-            overlay.querySelector('.popup-cancel-btn').onclick = close;
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) close();
-            });
-        }
-        
-        const titleEl = overlay.querySelector('.popup-title');
-        const msgEl = overlay.querySelector('.popup-message');
-        const actionBtn = overlay.querySelector('.popup-action-btn');
-        const cancelBtn = overlay.querySelector('.popup-cancel-btn');
-        
-        titleEl.textContent = title || 'Hinweis';
-        msgEl.textContent = message || '';
-        cancelBtn.textContent = cancelText;
-        
-        if (actionText && actionCallback) {
-            actionBtn.style.display = 'flex';
-            actionBtn.textContent = actionText;
-            actionBtn.onclick = () => {
-                actionCallback();
-                overlay.classList.remove('active');
-            };
-        } else {
-            actionBtn.style.display = 'none';
-            cancelBtn.textContent = 'OK';
-        }
-        
-        // Show
-        overlay.classList.add('active');
-        const content = overlay.querySelector('.popup-content');
-        // Reset transform for animation
-        content.style.transform = 'translateX(-50%) translateY(0)';
-    };
 })();

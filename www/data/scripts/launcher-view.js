@@ -517,7 +517,10 @@ function updateLauncherState() {
             document.body.style.backgroundImage = ''; // Fallback to CSS gradient
         }
         renderLauncherUI();
-        loadStationData(); // Daten für Widget laden
+        
+        // Daten verzögert laden, damit UI sofort da ist
+        setTimeout(loadStationData, 100);
+        
     } catch (e) {
         console.error("Launcher Crash Protection:", e);
         // Notfall-Modus: Falls was schiefgeht, Launcher-Modus deaktivieren damit man wieder was sieht
