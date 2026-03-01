@@ -9,14 +9,9 @@
   },
   "releases": [
     {
-      "version": "3.5.0",
-      "changelog": "Stable Release 3.5.0",
-      "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5.0/update.zip"
-    },
-    {
       "version": "3.4.10",
-      "changelog": "Bugfixes & Performance",
-      "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.4.10/update.zip"
+      "changelog": "Stable Release 3.4.10",
+      "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.4.10/dist.zip"
     }
   ]
 }
