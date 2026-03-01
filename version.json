@@ -3,9 +3,9 @@
   "changelog": "✨ Neues Update verfügbar!\n\n- Darstellungsfehler behoben\n- Updateprobleme behoben\n- Neue Features",
   "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5.1/dist.zip",
   "beta": {
-    "version": "3.5.2-beta.3",
+    "version": "3.5.2-beta.4",
     "changelog": "🧪 Beta-Version\n\n- Experimentelle Funktionen\n- Nutzung auf eigene Gefahr!",
-    "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5.2-beta.3/dist.zip"
+    "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5.2-beta.4/dist.zip"
   },
   "releases": [
     {
