@@ -95,6 +95,12 @@
             background: rgba(255,255,255,0.5);
             padding: 2px 8px; border-radius: 6px;
         }
+        
+        /* Beta Card Special */
+        .beta-card {
+            border-color: #ff9500 !important;
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, var(--background-color) 100%) !important;
+        }
     </style>
 </head>
 <body class="no-layout-change">
@@ -126,6 +132,18 @@
                 <button id="install-update-btn" class="btn-primary" style="width: 100%; padding: 16px; font-size: 16px;">Jetzt installieren</button>
             </div>
 
+            <!-- Beta Section -->
+            <div id="beta-section" style="display: none; margin-bottom: 30px;">
+                <h3 style="margin: 0 0 15px 5px; opacity: 0.6; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; color: #ff9500;">Beta / Experimentell</h3>
+                <div id="beta-card-content" class="card update-card beta-card">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+
+            <!-- Server History Section -->
+            <h3 style="margin: 30px 0 15px 5px; opacity: 0.6; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Verfügbar auf Server</h3>
+            <div id="server-list" class="version-list" style="margin-bottom: 30px;"></div>
+
             <!-- Installed Versions Section -->
             <h3 style="margin: 30px 0 15px 5px; opacity: 0.6; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Installierte Versionen</h3>
             <div id="version-list" class="version-list">
@@ -145,6 +163,8 @@
             const checkAgainBtn = document.getElementById('check-again-btn');
             
             const versionList = document.getElementById('version-list');
+            const serverList = document.getElementById('server-list');
+            const betaSection = document.getElementById('beta-section');
             const installBtn = document.getElementById('install-update-btn');
 
             const CapacitorUpdater = window.getCapacitorUpdater();
@@ -215,15 +235,58 @@
                 statusContainer.style.display = 'flex';
 
                 try {
-                    const updateData = await window.getUpdateInfo();
-                    if (updateData) {
-                        newUpdateData = updateData;
-                        document.getElementById('new-version-badge').textContent = `v${updateData.version}`;
-                        document.getElementById('new-version-changelog').textContent = updateData.changelog || 'Keine Informationen verfügbar.';
+                    // Hole das komplette Manifest (inkl. History & Beta)
+                    const manifest = await window.fetchUpdateManifest();
+                    
+                    // 1. Check Stable Update
+                    // Wir nutzen window.rxCompareVersions aus theme-manager.js
+                    const currentVer = document.querySelector('.app-version').textContent;
+                    
+                    if (window.rxCompareVersions(manifest.version, currentVer) > 0) {
+                        newUpdateData = manifest;
+                        document.getElementById('new-version-badge').textContent = `v${manifest.version}`;
+                        document.getElementById('new-version-changelog').textContent = manifest.changelog || 'Keine Informationen verfügbar.';
                         newUpdateCard.style.display = 'block';
                         statusContainer.style.display = 'none';
                     } else {
                         showStatusSuccess('Deine App ist aktuell', 'Es sind keine neuen Updates verfügbar.');
+                    }
+
+                    // 2. Check Beta
+                    if (manifest.beta) {
+                        betaSection.style.display = 'block';
+                        const betaCard = document.getElementById('beta-card-content');
+                        betaCard.innerHTML = `
+                            <div class="update-header">
+                                <div><h2 style="margin: 0; font-size: 20px; color: #ff9500;">Beta ${manifest.beta.version}</h2></div>
+                                <div class="version-badge" style="background:#ff9500;">BETA</div>
+                            </div>
+                            <div class="changelog-box" style="border-color: #ff9500;">${manifest.beta.changelog || 'Keine Infos'}</div>
+                            <button class="btn-secondary" style="width:100%; color:#ff9500;" onclick='installCustom("${manifest.beta.url}", "${manifest.beta.version}", ${JSON.stringify(manifest.beta.changelog || "")})'>Beta Installieren</button>
+                        `;
+                    }
+
+                    // 3. Render Server History
+                    if (manifest.releases && Array.isArray(manifest.releases)) {
+                        serverList.innerHTML = '';
+                        manifest.releases.forEach(rel => {
+                            // Überspringe die allerneueste, wenn sie schon oben als "Update verfügbar" angezeigt wird
+                            if (newUpdateData && rel.version === newUpdateData.version) return;
+
+                            const item = document.createElement('div');
+                            item.className = 'version-card';
+                            item.innerHTML = `
+                                <div class="v-info">
+                                    <div class="v-title">v${rel.version}</div>
+                                    <div class="v-meta">Release</div>
+                                </div>
+                                <button class="btn-secondary">Laden</button>
+                            `;
+                            item.querySelector('button').onclick = () => {
+                                installCustom(rel.url, rel.version, rel.changelog);
+                            };
+                            serverList.appendChild(item);
+                        });
                     }
                 } catch (e) {
                     statusIcon.classList.remove('spinning');
@@ -241,6 +304,15 @@
                 statusDesc.textContent = desc;
                 checkAgainBtn.style.display = 'inline-block';
             }
+
+            // Globale Funktion für Button-Klicks (Beta/History)
+            window.installCustom = (url, version, changelog) => {
+                const data = { url, version, changelog };
+                if(confirm(`Möchtest du Version ${version} wirklich installieren?`)) {
+                    // Startet Update sofort
+                    window.checkForOTAUpdates(false, data, true);
+                }
+            };
 
             installBtn.addEventListener('click', () => {
                 if (newUpdateData) {

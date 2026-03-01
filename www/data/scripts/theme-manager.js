@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.10';
+    const APP_VERSION = '3.5';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -473,15 +473,20 @@
         }
         return 0;
     }
+    window.rxCompareVersions = compareVersions; // Global verfügbar machen
+
+    // Holt das komplette Manifest (inkl. History & Beta)
+    window.fetchUpdateManifest = async function() {
+        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
+        const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Update-Server nicht erreichbar');
+        return await response.json();
+    };
 
     // Holt nur die Update-Infos vom Server
     window.getUpdateInfo = async function() {
-        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
         try {
-            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
-            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
-            const data = await response.json();
-            
+            const data = await window.fetchUpdateManifest();
             if (compareVersions(data.version, APP_VERSION) > 0) {
                 return data;
             }
