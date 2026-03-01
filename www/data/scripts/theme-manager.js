@@ -461,28 +461,53 @@
         };
     };
 
+    // Helper für korrekten Versionsvergleich (z.B. 3.10 > 3.9)
+    function compareVersions(v1, v2) {
+        const p1 = String(v1).split('.').map(Number);
+        const p2 = String(v2).split('.').map(Number);
+        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+            const n1 = p1[i] || 0;
+            const n2 = p2[i] || 0;
+            if (n1 > n2) return 1;
+            if (n1 < n2) return -1;
+        }
+        return 0;
+    }
+
+    // Holt nur die Update-Infos vom Server
+    window.getUpdateInfo = async function() {
+        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
+        try {
+            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
+            const data = await response.json();
+            
+            if (compareVersions(data.version, APP_VERSION) > 0) {
+                return data;
+            }
+            return null;
+        } catch (e) {
+            console.warn('OTA Check failed:', e);
+            throw e;
+        }
+    };
+
+    window.getCapacitorUpdater = function() {
+        return (window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.CapacitorUpdater : null;
+    };
+
     // OTA Update Logic
-    window.checkForOTAUpdates = async function(isSilent = false) {
+    window.checkForOTAUpdates = async function(isSilent = false, preloadedData = null, autoStart = false) {
         const btnText = document.querySelector('#update-check-btn span:first-child');
         const originalText = btnText ? btnText.textContent : 'Nach Updates suchen';
-        
-        // HIER ANPASSEN: Deine GitHub Raw URL
-        // Die URL muss auf eine version.json zeigen.
-        // Für Plugin-Updates muss 'url' im JSON auf eine ZIP-Datei mit dem 'www'-Ordner zeigen!
-        const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
-        const CURRENT_VERSION = APP_VERSION; 
         
         if(!isSilent && btnText) btnText.textContent = 'Prüfe...';
 
         try {
-            // Cache-Busting
-            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+            // Wenn Daten übergeben wurden (z.B. von updater.html), nutze diese, sonst neu laden
+            let data = preloadedData || await window.getUpdateInfo().catch(() => null);
             
-            if (!response.ok) throw new Error('Update-Server nicht erreichbar');
-            
-            const data = await response.json();
-            
-            if (data.version > CURRENT_VERSION) {
+            if (data) {
                 const performUpdate = async () => {
                     // Prüfen ob es sich um eine APK handelt (dann immer Browser nutzen)
                     const isApk = data.url && data.url.toLowerCase().endsWith('.apk');
@@ -623,7 +648,7 @@
                     }
                 };
 
-                if (isSilent) {
+                if (isSilent || autoStart) {
                     // Automatisch installieren ohne Nachfrage
                     performUpdate();
                 } else {
@@ -636,10 +661,9 @@
                 }
             } else {
                 // Nur Feedback geben, wenn nicht silent
-                if (!isSilent && window.showNotification) {
-                    window.showNotification('System', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`, null, 4000, true);
-                } else if (window.showAppPopup) {
-                     window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${CURRENT_VERSION}.`);
+                if (!isSilent) {
+                    if (window.showNotification) window.showNotification('System', `Du nutzt bereits die aktuelle Version ${APP_VERSION}.`, null, 4000, true);
+                    else if (window.showAppPopup) window.showAppPopup('Auf dem neuesten Stand', `Du nutzt bereits die aktuelle Version ${APP_VERSION}.`);
                 }
             }
         } catch (e) {

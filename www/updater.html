@@ -245,7 +245,7 @@
             installBtn.addEventListener('click', () => {
                 if (newUpdateData) {
                     // Wir rufen die globale Funktion auf, die die UI-Updates (Benachrichtigung etc.) handhabt
-                    window.checkForOTAUpdates(false, newUpdateData);
+                    window.checkForOTAUpdates(false, newUpdateData, true);
                 }
             });
             
