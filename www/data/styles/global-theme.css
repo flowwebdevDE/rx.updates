@@ -1136,3 +1136,47 @@ body.design-pink #status-notification .sn-progress-bar {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
+
+/* =========================================
+   BASE NAV CARD STYLING (Standard Design)
+   ========================================= */
+.nav-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+}
+.nav-card:active {
+    transform: scale(0.96);
+}
+.nav-card .icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    background-color: var(--accent-bg); /* Default soft accent bg */
+    color: var(--accent-color);
+    transition: transform 0.3s;
+}
+.nav-card:active .icon-box {
+    transform: scale(0.9);
+}
+.nav-card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.3px;
+}
+.nav-card p {
+    font-size: 13px;
+    opacity: 0.6;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.3;
+}
