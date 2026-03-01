@@ -1,5 +1,22 @@
 {
-  "version": "3.4.10",
-  "changelog": "Fehler bei der Installation von updates behoben",
-  "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.4.10/dist.zip"
+  "version": "3.5",
+  "changelog": "✨ Neues Update verfügbar!\n\n- Performance Optimierungen\n- Fehlerbehebungen\n- Neue Features",
+  "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5/update.zip",
+  "beta": {
+    "version": "3.6.0-beta.1",
+    "changelog": "🧪 Beta-Version\n\n- Experimentelle Funktionen\n- Nutzung auf eigene Gefahr!",
+    "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.6.0-beta.1/update.zip"
+  },
+  "releases": [
+    {
+      "version": "3.5.0",
+      "changelog": "Stable Release 3.5.0",
+      "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.5.0/update.zip"
+    },
+    {
+      "version": "3.4.10",
+      "changelog": "Bugfixes & Performance",
+      "url": "https://github.com/flowwebdevDE/rx.updates/releases/download/v3.4.10/update.zip"
+    }
+  ]
 }
