@@ -16,70 +16,99 @@
     /* Global Search Overlay */
     .search-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(242, 242, 247, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: rgba(242, 242, 247, 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
         z-index: 10000;
         display: flex; flex-direction: column;
         padding: 20px;
         transform: translateY(-100%);
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
         visibility: hidden;
     }
-    body.dark-mode .search-overlay { background: rgba(0, 0, 0, 0.9); }
+    body.dark-mode .search-overlay { background: rgba(0, 0, 0, 0.85); }
     .search-overlay.open { transform: translateY(0); visibility: visible; }
     
     .search-bar-wrap {
-        display: flex; gap: 10px; align-items: center; margin-bottom: 20px; margin-top: env(safe-area-inset-top);
+        display: flex; gap: 12px; align-items: center; margin-bottom: 25px; margin-top: env(safe-area-inset-top);
     }
     .search-input-container {
         flex: 1; position: relative;
     }
     .search-input-container svg {
-        position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-        color: var(--secondary-text-color); width: 18px; height: 18px;
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: var(--secondary-text-color); width: 20px; height: 20px;
     }
     #global-search {
-        width: 100%; padding: 12px 12px 12px 40px;
-        border-radius: 12px; border: none;
+        width: 100%; padding: 14px 14px 14px 46px;
+        border-radius: 16px; border: none;
         background: rgba(118, 118, 128, 0.12);
         font-size: 17px; color: var(--text-color);
         outline: none;
+        transition: background 0.2s;
     }
+    #global-search:focus { background: rgba(118, 118, 128, 0.18); }
     #search-cancel {
         color: var(--accent-color); font-weight: 600; background: none; border: none; font-size: 17px; cursor: pointer;
     }
     .search-results {
-        flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+        flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; padding-bottom: 40px; -webkit-overflow-scrolling: touch;
     }
+    .search-results::-webkit-scrollbar { display: none; }
 
     /* Control Center (Integrated) */
     .control-center-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 12px;
+        margin-bottom: 30px;
         transition: opacity 0.2s, height 0.2s;
     }
     
     .cc-button {
-        background: rgba(118, 118, 128, 0.12); border: none; border-radius: 20px;
+        background: var(--card-background); border: none; border-radius: 18px;
         aspect-ratio: 1; display: flex; flex-direction: column;
         align-items: center; justify-content: center;
         color: var(--text-color); font-size: 12px; font-weight: 600; gap: 8px;
-        transition: background-color 0.2s;
+        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
-    .cc-button.active { background: var(--card-background); color: var(--accent-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .cc-button:active { background: var(--border-color); }
-    .cc-button svg { width: 28px; height: 28px; }
+    .cc-button.active { background: var(--accent-color); color: white; box-shadow: 0 8px 20px var(--accent-bg); }
+    .cc-button:active { transform: scale(0.92); }
+    .cc-button svg { width: 26px; height: 26px; }
+
+    /* Result Items */
+    .search-result-card {
+        display: flex; align-items: center; padding: 14px 16px;
+        background: var(--card-background); border-radius: 16px; margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s, background-color 0.2s;
+        cursor: pointer; border: 1px solid transparent;
+    }
+    .search-result-card:active { transform: scale(0.98); background-color: var(--background-color); }
+    
+    .search-result-icon {
+        width: 42px; height: 42px; border-radius: 12px; background: var(--accent-bg); color: var(--accent-color);
+        display: flex; align-items: center; justify-content: center; margin-right: 14px; flex-shrink: 0; font-size: 20px;
+    }
+    .search-result-content { flex: 1; min-width: 0; }
+    .search-result-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
+    .search-result-desc { font-size: 13px; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .search-section-title {
+        margin: 10px 0 10px 4px; font-size: 13px; font-weight: 600; color: var(--secondary-text-color);
+        text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .search-clear-btn {
+        color: var(--accent-color); cursor: pointer; font-size: 12px; background: rgba(128,128,128,0.1); padding: 2px 8px; border-radius: 10px;
+    }
 
     /* Fake Search Bar on Main Page */
     .fake-search-bar {
         display: flex;
         align-items: center;
-        padding: 12px 16px;
+        padding: 14px 16px;
         background: rgba(118, 118, 128, 0.12);
-        border-radius: 12px;
+        border-radius: 16px;
         margin-bottom: 20px;
         cursor: pointer;
         transition: background-color 0.2s;
@@ -89,11 +118,21 @@
     }
     .fake-search-bar svg {
         color: var(--secondary-text-color);
-        width: 18px; height: 18px; margin-right: 8px;
+        width: 20px; height: 20px; margin-right: 10px;
     }
     .fake-search-bar span {
         color: var(--secondary-text-color); font-size: 17px;
     }
+    
+    /* Camera Button Premium Style */
+    #camera-btn {
+        width: 100%; margin-top: 20px; 
+        flex-direction: row; align-items: center; justify-content: center; gap: 12px; 
+        padding: 18px; font-size: 17px; font-weight: 600; 
+        color: var(--accent-color); border: none; background: var(--card-background); 
+        cursor: pointer; transition: transform 0.2s, background-color 0.2s;
+    }
+    #camera-btn:active { transform: scale(0.98); background-color: var(--background-color); }
   </style>
 </head>
 <body>
@@ -197,7 +236,7 @@
       </div>
 
       <!-- Kamera Button -->
-      <button id="camera-btn" class="card" style="width: 100%; margin-top: 20px; flex-direction: row; align-items: center; justify-content: center; gap: 12px; padding: 18px; font-size: 17px; font-weight: 600; color: var(--accent-color); border: none; background: var(--card-background); cursor: pointer;">
+      <button id="camera-btn" class="card">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         Kamera öffnen
       </button>
@@ -388,20 +427,22 @@
                 const history = getHistory();
                 if (history.length > 0) {
                     const histHeader = document.createElement('div');
-                    histHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding: 0 5px; margin-bottom: 10px; font-size: 13px; font-weight: 600; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: 0.5px;';
-                    histHeader.innerHTML = '<span>Zuletzt gesucht</span><span style="cursor:pointer; color:var(--accent-color);" id="clear-history">Löschen</span>';
+                    histHeader.className = 'search-section-title';
+                    histHeader.innerHTML = '<span>Zuletzt gesucht</span><span class="search-clear-btn" id="clear-history">Löschen</span>';
                     searchResults.appendChild(histHeader);
                     
                     history.forEach(h => {
                         const div = document.createElement('div');
-                        div.className = 'card nav-card';
-                        div.style.cssText = 'flex-direction: row; align-items: center; padding: 15px; min-height: auto; margin-bottom: 10px;';
+                        div.className = 'search-result-card';
                         
                         let iconHtml = h.icon || '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
                         
                         div.innerHTML = `
-                            <div class="icon-box" style="margin:0 15px 0 0; width:36px; height:36px; background:var(--button-secondary-bg); color:var(--text-color);">${iconHtml}</div>
-                            <div><h3 style="margin:0; font-size:16px;">${h.title}</h3><p style="margin:0; font-size:13px;">${h.desc}</p></div>
+                            <div class="search-result-icon">${iconHtml}</div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">${h.title}</div>
+                                <div class="search-result-desc">${h.desc}</div>
+                            </div>
                         `;
                         div.onclick = () => {
                             addToHistory(h);
@@ -410,10 +451,6 @@
                         };
                         searchResults.appendChild(div);
                     });
-                    
-                    const sep = document.createElement('hr');
-                    sep.style.cssText = 'border: 0; border-top: 1px solid var(--border-color); margin: 10px 0 20px 0; opacity: 0.5;';
-                    searchResults.appendChild(sep);
 
                     document.getElementById('clear-history').onclick = () => {
                         localStorage.removeItem(HISTORY_KEY);
@@ -432,7 +469,7 @@
                 else if (hour >= 18 || hour < 5) greeting = 'Guten Abend';
                 
                 header.textContent = greeting;
-                header.style.cssText = 'padding: 0 5px; margin-bottom: 10px; font-size: 13px; font-weight: 600; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: 0.5px;';
+                header.className = 'search-section-title';
                 searchResults.appendChild(header);
 
                 const suggestions = [
@@ -462,11 +499,13 @@
 
                 suggestions.forEach(s => {
                     const div = document.createElement('div');
-                    div.className = 'card nav-card';
-                    div.style.cssText = 'flex-direction: row; align-items: center; padding: 15px; min-height: auto; margin-bottom: 10px;';
+                    div.className = 'search-result-card';
                     div.innerHTML = `
-                        <div class="icon-box" style="margin:0 15px 0 0; width:36px; height:36px; background:var(--button-secondary-bg); color:var(--text-color);">${s.icon}</div>
-                        <div><h3 style="margin:0; font-size:16px;">${s.title}</h3><p style="margin:0; font-size:13px;">${s.desc}</p></div>
+                        <div class="search-result-icon">${s.icon}</div>
+                        <div class="search-result-content">
+                            <div class="search-result-title">${s.title}</div>
+                            <div class="search-result-desc">${s.desc}</div>
+                        </div>
                     `;
                     div.onclick = () => {
                         s.action();
@@ -481,16 +520,12 @@
             const filtered = cards.filter(c => c.title.toLowerCase().includes(lower) || c.desc.toLowerCase().includes(lower));
             filtered.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'card nav-card'; // Reuse styles
-                div.style.flexDirection = 'row';
-                div.style.alignItems = 'center';
-                div.style.padding = '15px';
-                div.style.minHeight = 'auto';
+                div.className = 'search-result-card';
                 div.innerHTML = `
-                    <div class="icon-box" style="margin-bottom:0; margin-right:15px; width:36px; height:36px;">${item.icon}</div>
-                    <div>
-                        <h3 style="margin:0; font-size:16px;">${item.title}</h3>
-                        <p style="margin:0; font-size:13px;">${item.desc}</p>
+                    <div class="search-result-icon">${item.icon}</div>
+                    <div class="search-result-content">
+                        <div class="search-result-title">${item.title}</div>
+                        <div class="search-result-desc">${item.desc}</div>
                     </div>
                 `;
                 div.onclick = () => {
@@ -504,16 +539,17 @@
             if (stationData.length > 0) {
                 const stations = stationData.filter(s => (s.tags.name || '').toLowerCase().startsWith(lower)).slice(0, 5);
                 if (stations.length > 0) {
-                    // Trenner
-                    if (filtered.length > 0) searchResults.appendChild(document.createElement('hr'));
-                    
                     stations.forEach(s => {
                         const div = document.createElement('div');
-                        div.className = 'card nav-card';
-                        div.style.cssText = 'flex-direction: row; align-items: center; padding: 15px; min-height: auto;';
+                        div.className = 'search-result-card';
                         div.innerHTML = `
-                            <div class="icon-box" style="margin:0 15px 0 0; width:36px; height:36px; background:var(--accent-bg); color:var(--accent-color);"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg></div>
-                            <div><h3 style="margin:0; font-size:16px;">${s.tags.name}</h3><p style="margin:0; font-size:13px;">Bahnhof • ${s.tags["railway:ref"] || ''}</p></div>
+                            <div class="search-result-icon" style="background:var(--accent-bg); color:var(--accent-color);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg>
+                            </div>
+                            <div class="search-result-content">
+                                <div class="search-result-title">${s.tags.name}</div>
+                                <div class="search-result-desc">Bahnhof • ${s.tags["railway:ref"] || ''}</div>
+                            </div>
                         `;
                         // Direkt zum Finder springen mit Suchbegriff
                         div.onclick = () => {
@@ -526,27 +562,16 @@
             }
 
             // Web-Suche Option (immer anzeigen wenn Text da ist)
-            if (filtered.length > 0) {
-                // Trenner wenn wir gemischte Ergebnisse haben
-                const sep = document.createElement('div');
-                sep.style.cssText = 'height: 1px; background: var(--border-color); margin: 5px 10px; opacity: 0.5;';
-                searchResults.appendChild(sep);
-            }
-
             const webDiv = document.createElement('div');
-            webDiv.className = 'card nav-card';
-            webDiv.style.flexDirection = 'row';
-            webDiv.style.alignItems = 'center';
-            webDiv.style.padding = '15px';
-            webDiv.style.minHeight = 'auto';
+            webDiv.className = 'search-result-card';
             
             webDiv.innerHTML = `
-                <div class="icon-box" style="margin-bottom:0; margin-right:15px; width:36px; height:36px; background: var(--button-secondary-bg); color: var(--text-color);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <div class="search-result-icon" style="background: var(--button-secondary-bg); color: var(--text-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </div>
-                <div>
-                    <h3 style="margin:0; font-size:16px;">Im Web suchen</h3>
-                    <p style="margin:0; font-size:13px;">"${term}" auf Google suchen</p>
+                <div class="search-result-content">
+                    <div class="search-result-title">Im Web suchen</div>
+                    <div class="search-result-desc">"${term}" auf Google suchen</div>
                 </div>
             `;
             webDiv.onclick = () => {

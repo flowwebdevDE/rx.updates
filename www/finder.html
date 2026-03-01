@@ -36,14 +36,28 @@
             left: 18px;
             color: var(--secondary-text-color);
             pointer-events: none;
+            z-index: 2;
         }
         #search {
             width: 100%;
-            padding: 16px 16px 16px 50px;
+            padding: 16px 44px 16px 50px;
             font-size: 17px;
             border-radius: 14px;
             border: none;
         }
+        #search-clear {
+            position: absolute;
+            right: 12px;
+            background: rgba(128,128,128,0.2);
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-color);
+            border: none; cursor: pointer;
+            display: none; /* Hidden by default */
+            z-index: 2;
+        }
+        #search-clear svg { width: 14px; height: 14px; }
 
         /* ===== RESULTS ===== */
         #status {
@@ -274,6 +288,9 @@
                     <div class="search-container">
                         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         <input id="search" type="text" placeholder="Suche...">
+                        <button id="search-clear">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
                     <div class="form-actions">
                         <button id="searchModeBtn" class="form-btn">
@@ -347,6 +364,7 @@
         };
 
         const searchInput = document.getElementById('search');
+        const searchClear = document.getElementById('search-clear');
         const geoBtn = document.getElementById('geoBtn');
         const mainContent = document.getElementById('main-content');
         const resultsList = document.getElementById('results');
@@ -643,6 +661,8 @@
             const term = e.target.value.toLowerCase().trim();
             const mode = currentSearchMode;
 
+            searchClear.style.display = term.length > 0 ? 'flex' : 'none';
+
             if (!term) {
                 if (currentPosition) {
                     updateNearbyStations();
@@ -762,6 +782,18 @@
         }, 50);
 
         searchInput.addEventListener('input', debounce(handleSearch));
+        
+        // Clear Button Logic
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            handleSearch({ target: searchInput });
+            searchInput.focus();
+        });
+
+        // Hide Keyboard on Scroll
+        resultsList.addEventListener('touchmove', () => {
+            if (document.activeElement === searchInput) searchInput.blur();
+        }, { passive: true });
 
     </script>
     <script src="data/scripts/lock.js"></script>

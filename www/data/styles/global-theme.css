@@ -9,6 +9,8 @@
     --border-color: #e5e5ea;
     --button-secondary-bg: #e4e6eb;
     --button-secondary-text: #000000;
+    --shadow-soft: 0 4px 24px rgba(0,0,0,0.06);
+    --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
 }
 
 /* Dark Mode */
@@ -70,15 +72,29 @@ body {
     background-color: #000000;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Modern Header with Blur */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: rgba(242, 242, 247, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.dark-mode .header {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .card, .nav-card, .popup-card, .options-card {
     background-color: var(--card-background) !important;
     color: var(--text-color) !important;
-}
-
-h1, h2, h3, h4, h5, h6, p, span, .ref, a {
-    color: var(--text-color);
+    box-shadow: var(--shadow-soft);
 }
 
 .secondary, .ref, .group-time, .group-preview, #status {
@@ -91,14 +107,20 @@ h1, h2, h3, h4, h5, h6, p, span, .ref, a {
 }
 
 /* Inputs */
-input, select, textarea {
-    background: rgba(118, 118, 128, 0.12) !important;
+input, select, textarea, .fake-search-bar {
+    background: rgba(118, 118, 128, 0.08) !important;
     color: var(--text-color) !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    font-size: 17px !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease;
 }
-
-body.dark-mode input, 
-body.dark-mode select {
-    background: rgba(118, 118, 128, 0.24) !important;
+input:focus, select:focus, textarea:focus {
+    background: var(--card-background) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 4px var(--accent-bg);
+    outline: none;
 }
 
 /* Spezifische Input Overrides für Dark Mode */
@@ -148,7 +170,7 @@ body.accent-brown { --accent-color: #795548; --accent-bg: rgba(121, 85, 72, 0.15
 
 /* Global Radius Variable (Default) */
 :root {
-    --card-radius: 18px;
+    --card-radius: 22px;
 }
 
 /* Apply radius globally */
@@ -158,7 +180,7 @@ body.accent-brown { --accent-color: #795548; --accent-bg: rgba(121, 85, 72, 0.15
 
 /* 1. Standard (Grid 2 Spalten) */
 body.design-standard {
-    --card-radius: 18px;
+    --card-radius: 22px;
 }
 
 /* MEHR AKZENTFARBE für nicht-standard Layouts */
@@ -1135,48 +1157,4 @@ body.design-pink #status-notification .sn-progress-bar {
 #login-overlay {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-}
-
-/* =========================================
-   BASE NAV CARD STYLING (Standard Design)
-   ========================================= */
-.nav-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px 16px;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
-}
-.nav-card:active {
-    transform: scale(0.96);
-}
-.nav-card .icon-box {
-    width: 60px;
-    height: 60px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
-    background-color: var(--accent-bg); /* Default soft accent bg */
-    color: var(--accent-color);
-    transition: transform 0.3s;
-}
-.nav-card:active .icon-box {
-    transform: scale(0.9);
-}
-.nav-card h3 {
-    font-size: 17px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-    letter-spacing: -0.3px;
-}
-.nav-card p {
-    font-size: 13px;
-    opacity: 0.6;
-    margin: 0;
-    font-weight: 500;
-    line-height: 1.3;
 }
