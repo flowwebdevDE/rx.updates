@@ -151,7 +151,7 @@
             let newUpdateData = null;
 
             async function renderInstalledVersions() {
-                versionList.innerHTML = '';
+                versionList.innerHTML = '<div style="padding: 40px; text-align: center;"><svg class="spinning" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--secondary-text-color);"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>';
                 if (!CapacitorUpdater) {
                     versionList.innerHTML = '<div style="padding: 20px; text-align: center; opacity: 0.6;">Updater-Plugin nicht verfügbar.</div>';
                     return;
@@ -159,13 +159,14 @@
                 try {
                     const list = await CapacitorUpdater.list();
                     const current = await CapacitorUpdater.current();
+                    versionList.innerHTML = ''; // Spinner entfernen
 
                     const originalVersionItem = document.createElement('div');
                     originalVersionItem.className = `version-card ${!current.id ? 'active' : ''}`;
                     originalVersionItem.innerHTML = `
                         <div class="v-info">
                             <div class="v-title">Original-Version ${!current.id ? '<span class="active-tag">Aktiv</span>' : ''}</div>
-                            <div class="v-meta">Basis-App (v<span class="app-version"></span>)</div>
+                            <div class="v-meta">Basis-App <span class="app-version"></span></div>
                         </div>
                         ${current.id ? '<button class="btn-secondary">Aktivieren</button>' : ''}
                     `;

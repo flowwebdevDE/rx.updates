@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.4.8';
+    const APP_VERSION = '3.4.9';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -451,19 +451,42 @@
         };
     };
 
+    // Helper für korrekten Versionsvergleich (z.B. 3.10 > 3.9)
+    function compareVersions(v1, v2) {
+        const p1 = String(v1).split('.').map(Number);
+        const p2 = String(v2).split('.').map(Number);
+        for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+            const n1 = p1[i] || 0;
+            const n2 = p2[i] || 0;
+            if (n1 > n2) return 1;
+            if (n1 < n2) return -1;
+        }
+        return 0;
+    }
+
     // Holt nur die Update-Infos vom Server
     window.getUpdateInfo = async function() {
         const UPDATE_API_URL = 'https://raw.githubusercontent.com/flowwebdevDE/rx.updates/main/version.json'; 
         const CURRENT_VERSION = APP_VERSION;
+        
+        // Timeout Controller (bricht nach 8s ab, damit es nicht endlos lädt)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         try {
-            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime());
+            const response = await fetch(UPDATE_API_URL + '?t=' + new Date().getTime(), { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
             if (!response.ok) throw new Error('Update-Server nicht erreichbar');
             const data = await response.json();
-            if (data.version > CURRENT_VERSION) {
+            
+            // Korrekter numerischer Vergleich
+            if (compareVersions(data.version, CURRENT_VERSION) > 0) {
                 return data; // Update-Daten zurückgeben
             }
             return null; // Kein Update
         } catch (e) {
+            clearTimeout(timeoutId);
             console.warn('OTA Check failed:', e);
             throw e; // Fehler weitergeben, damit die UI ihn behandeln kann
         }
