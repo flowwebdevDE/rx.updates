@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -14,55 +15,103 @@
             border-radius: 12px;
             text-align: center;
         }
-        .sun-label { font-size: 11px; color: var(--secondary-text-color); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-        .sun-time { font-size: 20px; font-weight: 700; margin: 4px 0; color: var(--text-color); }
-        .sun-sub { font-size: 11px; opacity: 0.7; color: var(--text-color); }
-        
+
+        .sun-label {
+            font-size: 11px;
+            color: var(--secondary-text-color);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sun-time {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 4px 0;
+            color: var(--text-color);
+        }
+
+        .sun-sub {
+            font-size: 11px;
+            opacity: 0.7;
+            color: var(--text-color);
+        }
+
         input[type=range] {
-            height: 6px; border-radius: 3px; background: rgba(128,128,128,0.2);
-            -webkit-appearance: none; margin: 10px 0;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(128, 128, 128, 0.2);
+            -webkit-appearance: none;
+            margin: 10px 0;
         }
 
         /* Search Styles */
-        .searchContainer { position: relative; display: flex; gap: 10px; }
-        #station-search { flex: 1; }
+        .searchContainer {
+            position: relative;
+            display: flex;
+            gap: 10px;
+        }
+
+        #station-search {
+            flex: 1;
+        }
+
         .autocomplete-list {
-            position: absolute; top: 100%; left: 0; right: 0;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: var(--card-background);
             border: 1px solid var(--border-color);
             border-radius: 14px;
             margin-top: 8px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             z-index: 100;
             overflow: hidden;
             display: none;
         }
+
         .autocomplete-item {
             padding: 14px 16px;
             cursor: pointer;
             border-bottom: 1px solid var(--border-color);
         }
-        .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover { background: var(--background-color); }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--background-color);
+        }
     </style>
 </head>
+
 <body>
     <div class="app">
         <header class="header">
             <a href="index.html" class="back-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
             </a>
             <h1>Sonnenstand</h1>
             <p>Lichtverhältnisse prüfen</p>
         </header>
 
         <main class="content animate-stagger">
-            <div class="card" id="search-card">
+            <div class="card" id="search-card" style="display: none;">
                 <div class="searchContainer">
                     <input id="station-search" type="text" placeholder="Ort oder Betriebsstelle..." autocomplete="off">
                     <div id="suggestions-list" class="autocomplete-list"></div>
-                    <button id="use-gps-btn" class="btn-secondary" title="Meinen Standort verwenden" style="padding: 0 14px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle></svg>
+                    <button id="use-gps-btn" class="btn-secondary" title="Meinen Standort verwenden"
+                        style="padding: 0 14px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -70,11 +119,26 @@
             <div class="card" id="sun-widget">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0;" id="location-title">Sonnenstand</h3>
-                    <span id="sun-current-status" style="font-size:12px; font-weight:600; color:var(--accent-color); background:var(--accent-bg); padding:4px 8px; border-radius:8px;">Lade...</span>
+                    <span id="sun-current-status"
+                        style="font-size:12px; font-weight:600; color:var(--accent-color); background:var(--accent-bg); padding:4px 8px; border-radius:8px;">Lade...</span>
                 </div>
-                
+
+                <div class="searchContainer">
+                    <input id="station-search" type="text" placeholder="Ort oder Betriebsstelle..." autocomplete="off">
+                    <div id="suggestions-list" class="autocomplete-list"></div>
+                    <button id="use-gps-btn" class="btn-secondary" title="Meinen Standort verwenden"
+                        style="padding: 0 14px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                        </svg>
+                    </button>
+                </div>
+
                 <!-- Canvas für Sonnenbahn -->
-                <div style="position: relative; height: 180px; margin-bottom: 15px; background: linear-gradient(to bottom, var(--background-color), var(--card-background)); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div
+                    style="position: relative; height: 180px; margin-bottom: 15px; background: linear-gradient(to bottom, var(--background-color), var(--card-background)); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color);">
                     <canvas id="sun-canvas" style="width: 100%; height: 100%; display:block;"></canvas>
                 </div>
 
@@ -90,10 +154,25 @@
                         <div class="sun-sub">Blaue Std: <span id="blue-evening">--:--</span></div>
                     </div>
                 </div>
-                
-                <div id="golden-hour-box" style="margin-top: 10px; padding: 12px; background: rgba(255, 165, 0, 0.1); border-radius: 12px; border: 1px solid rgba(255, 165, 0, 0.2); display:none;">
-                    <div style="font-size: 11px; color: #e67e22; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; display:flex; align-items:center; gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> Goldene Stunde (Foto)</div>
-                    <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: var(--text-color);">
+
+                <div id="golden-hour-box"
+                    style="margin-top: 10px; padding: 12px; background: rgba(255, 165, 0, 0.1); border-radius: 12px; border: 1px solid rgba(255, 165, 0, 0.2); display:none;">
+                    <div
+                        style="font-size: 11px; color: #e67e22; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; display:flex; align-items:center; gap:6px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2" />
+                            <path d="M12 20v2" />
+                            <path d="m4.93 4.93 1.41 1.41" />
+                            <path d="m17.66 17.66 1.41 1.41" />
+                            <path d="M2 12h2" />
+                            <path d="M20 12h2" />
+                            <path d="m6.34 17.66-1.41 1.41" />
+                            <path d="m19.07 4.93-1.41 1.41" />
+                        </svg> Goldene Stunde (Foto)</div>
+                    <div
+                        style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: var(--text-color);">
                         <span id="golden-morning">--:--</span>
                         <span style="opacity:0.3">|</span>
                         <span id="golden-evening">--:--</span>
@@ -104,24 +183,43 @@
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                         <span style="font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
                             Zeit-Simulation
                         </span>
-                        <button id="sim-reset-btn" style="background:var(--button-secondary-bg); border:none; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; color:var(--text-color);">Jetzt</button>
+                        <button id="sim-reset-btn"
+                            style="background:var(--button-secondary-bg); border:none; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; color:var(--text-color);">Jetzt</button>
                     </div>
-                    <div style="text-align:center; font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; margin-bottom:5px;" id="sim-time-display">--:--</div>
-                    <input type="range" id="sun-slider" min="0" max="1439" value="720" style="width:100%; accent-color:var(--accent-color);">
-                    
-                    <div style="display:flex; align-items:center; gap:15px; margin-top:15px; background:rgba(128,128,128,0.05); padding:10px; border-radius:12px;">
-                        <div style="position:relative; width:60px; height:60px; border-radius:50%; border:2px solid var(--border-color); flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--card-background);">
-                            <div style="position:absolute; top:2px; font-size:8px; font-weight:bold; color:var(--secondary-text-color);">N</div>
-                            <div id="compass-arrow" style="width:100%; height:100%; position:absolute; transition:transform 0.1s linear;">
-                                <div style="width:8px; height:8px; background:#ff9500; border-radius:50%; position:absolute; top:-4px; left:50%; transform:translateX(-50%); box-shadow:0 0 5px #ff9500;"></div>
-                                <div style="width:2px; height:50%; background:linear-gradient(to top, transparent, #ff9500); position:absolute; top:0; left:50%; transform:translateX(-50%);"></div>
+                    <div style="text-align:center; font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; margin-bottom:5px;"
+                        id="sim-time-display">--:--</div>
+                    <input type="range" id="sun-slider" min="0" max="1439" value="720"
+                        style="width:100%; accent-color:var(--accent-color);">
+
+                    <div
+                        style="display:flex; align-items:center; gap:15px; margin-top:15px; background:rgba(128,128,128,0.05); padding:10px; border-radius:12px;">
+                        <div
+                            style="position:relative; width:60px; height:60px; border-radius:50%; border:2px solid var(--border-color); flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--card-background);">
+                            <div
+                                style="position:absolute; top:2px; font-size:8px; font-weight:bold; color:var(--secondary-text-color);">
+                                N</div>
+                            <div id="compass-arrow"
+                                style="width:100%; height:100%; position:absolute; transition:transform 0.1s linear;">
+                                <div
+                                    style="width:8px; height:8px; background:#ff9500; border-radius:50%; position:absolute; top:-4px; left:50%; transform:translateX(-50%); box-shadow:0 0 5px #ff9500;">
+                                </div>
+                                <div
+                                    style="width:2px; height:50%; background:linear-gradient(to top, transparent, #ff9500); position:absolute; top:0; left:50%; transform:translateX(-50%);">
+                                </div>
                             </div>
                         </div>
                         <div style="flex:1;">
-                            <div style="font-size:11px; text-transform:uppercase; color:var(--secondary-text-color); font-weight:600;">Sonnenrichtung</div>
+                            <div
+                                style="font-size:11px; text-transform:uppercase; color:var(--secondary-text-color); font-weight:600;">
+                                Sonnenrichtung</div>
                             <div id="sun-direction-text" style="font-size:16px; font-weight:600;">--</div>
                             <div id="sun-altitude-text" style="font-size:13px; opacity:0.7;">--</div>
                         </div>
@@ -134,7 +232,7 @@
     <script src="data/scripts/theme-manager.js"></script>
     <script>
         // --- SunCalc Algorithm (self-contained) ---
-        const SunCalc = (function() {
+        const SunCalc = (function () {
             const PI = Math.PI, sin = Math.sin, cos = Math.cos, tan = Math.tan, asin = Math.asin, atan = Math.atan2, acos = Math.acos, rad = PI / 180;
             const dayMs = 1000 * 60 * 60 * 24, J1970 = 2440588, J2000 = 2451545;
             function toJulian(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
@@ -147,32 +245,32 @@
             function getSolarMeanAnomaly(d) { return rad * (357.5291 + 0.98560028 * d); }
             function getEclipticLongitude(M) { const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), P = rad * 102.9372; return M + C + P + PI; }
             function getSunCoords(d) { const M = getSolarMeanAnomaly(d), L = getEclipticLongitude(M); return { dec: getDeclination(L, 0), ra: getRightAscension(L, 0) }; }
-            
+
             return {
-                getPosition: function(date, lat, lng) {
+                getPosition: function (date, lat, lng) {
                     const lw = rad * -lng, phi = rad * lat, d = toDays(date), c = getSunCoords(d), H = getSiderealTime(d, lw) - c.ra;
                     return { azimuth: getAzimuth(H, phi, c.dec), altitude: getAltitude(H, phi, c.dec) };
                 },
-                getTimes: function(date, lat, lng) {
+                getTimes: function (date, lat, lng) {
                     const rad = PI / 180, J0 = 0.0009;
                     function getJulianCycle(d, lw) { return Math.round(d - J0 - lw / (2 * PI)); }
                     function getApproxSolarTransit(Ht, lw, n) { return J0 + (Ht + lw) / (2 * PI) + n; }
                     function getSolarTransitJ(ds, M, L) { return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L); }
                     function getHourAngle(h, phi, dec) { return acos((sin(h) - sin(phi) * sin(dec)) / (cos(phi) * cos(dec))); }
-                    
+
                     const lw = rad * -lng, phi = rad * lat, d = toDays(date), n = getJulianCycle(d, lw), ds = getApproxSolarTransit(0, lw, n), M = getSolarMeanAnomaly(ds), L = getEclipticLongitude(M), dec = getDeclination(L, 0), Jnoon = getSolarTransitJ(ds, M, L);
-                    
+
                     function getTime(h) {
                         const w = getHourAngle(h * rad, phi, dec);
-                        if (isNaN(w)) return {}; 
+                        if (isNaN(w)) return {};
                         const Jset = Jnoon + w / (2 * PI), Jrise = Jnoon - w / (2 * PI);
                         return { rise: new Date((Jrise + 0.5 - J1970) * dayMs), set: new Date((Jset + 0.5 - J1970) * dayMs) };
                     }
-                    
+
                     const times = getTime(-0.833);
                     const golden = getTime(6);
                     const blue = getTime(-6);
-                    
+
                     return {
                         sunrise: times.rise, sunset: times.set,
                         goldenHourMorningEnd: golden.rise, goldenHourEveningStart: golden.set,
@@ -194,13 +292,13 @@
             const targetDate = simulatedTime ? simulatedTime : now;
             const times = SunCalc.getTimes(now, lat, lon);
             const pos = SunCalc.getPosition(targetDate, lat, lon);
-            const fmt = d => d ? d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--';
-            
+            const fmt = d => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+
             document.getElementById('sunrise-time').textContent = fmt(times.sunrise);
             document.getElementById('sunset-time').textContent = fmt(times.sunset);
             document.getElementById('blue-morning').textContent = fmt(times.blueHourMorningStart);
             document.getElementById('blue-evening').textContent = fmt(times.blueHourEveningEnd);
-            
+
             if (times.goldenHourMorningEnd && times.goldenHourEveningStart) {
                 document.getElementById('golden-hour-box').style.display = 'block';
                 document.getElementById('golden-morning').textContent = `${fmt(times.sunrise)} - ${fmt(times.goldenHourMorningEnd)}`;
@@ -208,7 +306,7 @@
             }
 
             let status = 'Tag';
-            const altDeg = pos.altitude * (180/Math.PI);
+            const altDeg = pos.altitude * (180 / Math.PI);
             if (altDeg < -18) status = 'Nacht';
             else if (altDeg < -6) status = 'Dämmerung';
             else if (altDeg < 0) status = 'Blaue Stunde';
@@ -221,12 +319,12 @@
             const h = canvas.height = canvas.offsetHeight * 2;
             ctx.clearRect(0, 0, w, h);
             const horizonY = h * 0.75;
-            
+
             ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 165, 0, 0.3)'; ctx.lineWidth = 4; ctx.setLineDash([10, 10]);
-            for (let x = 0; x <= w; x+=5) {
+            for (let x = 0; x <= w; x += 5) {
                 const progress = x / w;
                 const y = horizonY - Math.sin(progress * Math.PI) * (h * 0.55);
-                if (x===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.stroke(); ctx.setLineDash([]);
 
@@ -243,9 +341,9 @@
             }
             ctx.beginPath(); ctx.strokeStyle = 'rgba(128,128,128,0.3)'; ctx.lineWidth = 2; ctx.moveTo(0, horizonY); ctx.lineTo(w, horizonY); ctx.stroke();
 
-            const azimuthDeg = (pos.azimuth * (180/Math.PI)) + 180;
+            const azimuthDeg = (pos.azimuth * (180 / Math.PI)) + 180;
             const compassArrow = document.getElementById('compass-arrow');
-            if(compassArrow) compassArrow.style.transform = `rotate(${azimuthDeg}deg)`;
+            if (compassArrow) compassArrow.style.transform = `rotate(${azimuthDeg}deg)`;
 
             const dirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW', 'N'];
             const dirIndex = Math.round(azimuthDeg / 45) % 8;
@@ -270,13 +368,13 @@
 
         document.getElementById('sun-slider').addEventListener('input', (e) => {
             const min = parseInt(e.target.value);
-            const d = new Date(); d.setHours(Math.floor(min/60), min%60, 0, 0);
+            const d = new Date(); d.setHours(Math.floor(min / 60), min % 60, 0, 0);
             simulatedTime = d;
-            if(lastKnownPos) updateSunWidget(lastKnownPos.lat, lastKnownPos.lon);
+            if (lastKnownPos) updateSunWidget(lastKnownPos.lat, lastKnownPos.lon);
         });
         document.getElementById('sim-reset-btn').addEventListener('click', () => {
             simulatedTime = null;
-            if(lastKnownPos) updateSunWidget(lastKnownPos.lat, lastKnownPos.lon);
+            if (lastKnownPos) updateSunWidget(lastKnownPos.lat, lastKnownPos.lon);
         });
 
         // --- Location Search & Selection ---
@@ -297,7 +395,7 @@
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.trim().toLowerCase();
             clearTimeout(debounceTimer);
-            
+
             if (term.length < 2) {
                 suggestionsList.style.display = 'none';
                 return;
@@ -305,7 +403,7 @@
 
             debounceTimer = setTimeout(() => {
                 const stationResults = stations
-                    .filter(s => 
+                    .filter(s =>
                         (s.tags.name && s.tags.name.toLowerCase().includes(term)) ||
                         (s.tags['railway:ref'] && s.tags['railway:ref'].toLowerCase().includes(term))
                     )
@@ -364,4 +462,5 @@
         }
     </script>
 </body>
+
 </html>
