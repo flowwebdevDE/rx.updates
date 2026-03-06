@@ -865,6 +865,7 @@ body.design-pink .nav-card {
     padding: 15px;
     box-shadow: 0 10px 25px rgba(233, 30, 99, 0.15);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 1 !important; /* Fix: Animation override caused opacity: 0 */
 }
 
 body.design-pink.dark-mode .nav-card h3 {

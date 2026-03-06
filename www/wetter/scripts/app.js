@@ -108,11 +108,11 @@ function render(data, lat, lon, label) {
 
     // Details als Grid-Items für das neue Layout
     document.getElementById('details').innerHTML = `
-        <div>
+        <div style="display:none;">
             <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Aufgang</div>
             ${sunrise}
         </div>
-        <div>
+        <div style="display:none;">
             <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Untergang</div>
             ${sunset}
         </div>
