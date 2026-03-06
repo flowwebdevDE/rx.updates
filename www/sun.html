@@ -101,7 +101,7 @@
         </header>
 
         <main class="content animate-stagger">
-            <div class="card" id="search-card" style="display: none;">
+            <div class="card" id="search-card">
                 <div class="searchContainer">
                     <input id="station-search" type="text" placeholder="Ort oder Betriebsstelle..." autocomplete="off">
                     <div id="suggestions-list" class="autocomplete-list"></div>
@@ -121,19 +121,6 @@
                     <h3 style="margin:0;" id="location-title">Sonnenstand</h3>
                     <span id="sun-current-status"
                         style="font-size:12px; font-weight:600; color:var(--accent-color); background:var(--accent-bg); padding:4px 8px; border-radius:8px;">Lade...</span>
-                </div>
-
-                <div class="searchContainer">
-                    <input id="station-search" type="text" placeholder="Ort oder Betriebsstelle..." autocomplete="off">
-                    <div id="suggestions-list" class="autocomplete-list"></div>
-                    <button id="use-gps-btn" class="btn-secondary" title="Meinen Standort verwenden"
-                        style="padding: 0 14px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <circle cx="12" cy="12" r="6"></circle>
-                        </svg>
-                    </button>
                 </div>
 
                 <!-- Canvas für Sonnenbahn -->
