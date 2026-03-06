@@ -301,6 +301,10 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line></svg>
                             <span>Umkreis</span>
                         </button>
+                        <button id="discoverBtn" class="form-btn" style="grid-column: span 2;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            <span>Entdecken</span>
+                        </button>
                     </div>
                 </div>
         
@@ -366,6 +370,7 @@
         const searchInput = document.getElementById('search');
         const searchClear = document.getElementById('search-clear');
         const geoBtn = document.getElementById('geoBtn');
+        const discoverBtn = document.getElementById('discoverBtn');
         const mainContent = document.getElementById('main-content');
         const resultsList = document.getElementById('results');
         const statusText = document.getElementById('status');
@@ -704,6 +709,42 @@
             renderStations(nearby);
         }
 
+        // === Entdecken Modus ===
+        function showDiscovery() {
+            statusText.textContent = 'Empfohlene Orte';
+            resultsList.innerHTML = '';
+            
+            // Kuratierte Liste (Beispielhaft)
+            const featured = [
+                { name: 'Berlin Hbf', desc: 'Hauptstadt-Knotenpunkt', tags: { name: 'Berlin Hbf', "railway:ref": "BLS" }, lat: 52.525, lon: 13.369 },
+                { name: 'Hamburg Hbf', desc: 'Tor zur Welt', tags: { name: 'Hamburg Hbf', "railway:ref": "AH" }, lat: 53.553, lon: 10.006 },
+                { name: 'Köln Hbf', desc: 'Am Dom', tags: { name: 'Köln Hbf', "railway:ref": "KK" }, lat: 50.943, lon: 6.958 },
+                { name: 'München Hbf', desc: 'Drehkreuz im Süden', tags: { name: 'München Hbf', "railway:ref": "MH" }, lat: 48.140, lon: 11.560 },
+                { name: 'Frankfurt(Main)Hbf', desc: 'Finanzmetropole', tags: { name: 'Frankfurt(Main)Hbf', "railway:ref": "FF" }, lat: 50.107, lon: 8.663 }
+            ];
+
+            featured.forEach((item, i) => {
+                const li = document.createElement('li');
+                li.className = 'animate-in';
+                li.style.animationDelay = `${i * 0.05}s`;
+                li.innerHTML = `
+                    <div class="result-icon" style="background: var(--accent-bg); color: var(--accent-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-title">${item.name}</div>
+                        <div class="result-subtitle">${item.desc}</div>
+                    </div>
+                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                `;
+                li.onclick = () => {
+                    vibrate();
+                    showPopup(item);
+                };
+                resultsList.appendChild(li);
+            });
+        }
+
         // === Standort automatisch abfragen ===
         function startGeoTracking() {
             if (window.getSettings) {
@@ -753,6 +794,7 @@
         }
 
         geoBtn.addEventListener('click', startGeoTracking);
+        discoverBtn.addEventListener('click', showDiscovery);
 
         // Alle Buttons mit Vibration ausstatten
         document.querySelectorAll('button').forEach(button => {

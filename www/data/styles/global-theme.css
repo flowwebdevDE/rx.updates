@@ -1210,3 +1210,21 @@ body.design-pink #status-notification .sn-progress-bar {
     opacity: 0;
     animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* --- New Features: Filter Chips --- */
+.filter-scroll-container {
+    display: flex; gap: 8px; overflow-x: auto; padding: 10px 15px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.filter-scroll-container::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    background: var(--card-background); color: var(--text-color);
+    border: 1px solid var(--border-color); padding: 6px 14px;
+    border-radius: 20px; font-size: 13px; font-weight: 600;
+    white-space: nowrap; cursor: pointer; transition: all 0.2s;
+}
+.filter-chip.active {
+    background: var(--accent-color); color: white; border-color: var(--accent-color);
+    box-shadow: 0 2px 8px var(--accent-bg);
+}

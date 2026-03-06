@@ -1,5 +1,5 @@
 (function() {
-    const APP_VERSION = '3.5.2-beta.7';
+    const APP_VERSION = '3.5.2-beta.8';
 
     const DESIGN_KEY = 'rx_design';
     const DARKMODE_KEY = 'rx_darkmode';
@@ -20,6 +20,7 @@
     const FONT_KEY = 'rx_custom_font';
     const PREMIUM_KEY = 'rx_is_premium';
     const PREMIUM_CODE = 'premium'; // Der Code für Premium
+    const XP_KEY = 'rx_user_xp'; // Gamification
 
     // Cache für Settings, um localStorage Zugriffe zu minimieren
     let _settingsCache = null;
@@ -460,6 +461,33 @@
             isPremium: localStorage.getItem(PREMIUM_KEY) === 'true'
         };
         return _settingsCache;
+    };
+
+    // --- GAMIFICATION SYSTEM ---
+    window.getUserXP = function() {
+        return parseInt(localStorage.getItem(XP_KEY) || '0');
+    };
+
+    window.getLevel = function() {
+        const xp = window.getUserXP();
+        return Math.floor(Math.sqrt(xp / 100)) + 1; // Simple progression: 0->1, 100->2, 400->3
+    };
+
+    window.awardXP = function(points, reason) {
+        const currentXP = window.getUserXP();
+        const oldLevel = window.getLevel();
+        const newXP = currentXP + points;
+        localStorage.setItem(XP_KEY, newXP);
+        
+        const newLevel = Math.floor(Math.sqrt(newXP / 100)) + 1;
+        
+        if (newLevel > oldLevel) {
+            if (window.showAppPopup) window.showAppPopup('Level Up!', `Glückwunsch! Du hast Level ${newLevel} erreicht.`);
+            else if (window.showNotification) window.showNotification('Level Up!', `Level ${newLevel} erreicht!`, null, 3000, true);
+        }
+        
+        // Event für UI Updates feuern
+        window.dispatchEvent(new CustomEvent('rx-xp-changed', { detail: { xp: newXP, level: newLevel, reason } }));
     };
 
     // Helper für korrekten Versionsvergleich (z.B. 3.10 > 3.9)
