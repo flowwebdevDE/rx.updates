@@ -22,6 +22,28 @@
             height: 6px; border-radius: 3px; background: rgba(128,128,128,0.2);
             -webkit-appearance: none; margin: 10px 0;
         }
+
+        /* Search Styles */
+        .searchContainer { position: relative; display: flex; gap: 10px; }
+        #station-search { flex: 1; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            margin-top: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            z-index: 100;
+            overflow: hidden;
+            display: none;
+        }
+        .autocomplete-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover { background: var(--background-color); }
     </style>
 </head>
 <body>
@@ -35,9 +57,19 @@
         </header>
 
         <main class="content animate-stagger">
+            <div class="card" id="search-card">
+                <div class="searchContainer">
+                    <input id="station-search" type="text" placeholder="Ort oder Betriebsstelle..." autocomplete="off">
+                    <div id="suggestions-list" class="autocomplete-list"></div>
+                    <button id="use-gps-btn" class="btn-secondary" title="Meinen Standort verwenden" style="padding: 0 14px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle></svg>
+                    </button>
+                </div>
+            </div>
+
             <div class="card" id="sun-widget">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0;">Aktueller Stand</h3>
+                    <h3 style="margin:0;" id="location-title">Sonnenstand</h3>
                     <span id="sun-current-status" style="font-size:12px; font-weight:600; color:var(--accent-color); background:var(--accent-bg); padding:4px 8px; border-radius:8px;">Lade...</span>
                 </div>
                 
@@ -101,6 +133,7 @@
 
     <script src="data/scripts/theme-manager.js"></script>
     <script>
+        // --- SunCalc Algorithm (self-contained) ---
         const SunCalc = (function() {
             const PI = Math.PI, sin = Math.sin, cos = Math.cos, tan = Math.tan, asin = Math.asin, atan = Math.atan2, acos = Math.acos, rad = PI / 180;
             const dayMs = 1000 * 60 * 60 * 24, J1970 = 2440588, J2000 = 2451545;
@@ -149,11 +182,14 @@
             };
         })();
 
+        // --- Main App Logic ---
         let simulatedTime = null;
         let lastKnownPos = null;
 
         function updateSunWidget(lat, lon) {
             lastKnownPos = { lat, lon };
+            if (!lat || !lon) return;
+
             const now = new Date();
             const targetDate = simulatedTime ? simulatedTime : now;
             const times = SunCalc.getTimes(now, lat, lon);
@@ -243,10 +279,88 @@
             if(lastKnownPos) updateSunWidget(lastKnownPos.lat, lastKnownPos.lon);
         });
 
+        // --- Location Search & Selection ---
+        const searchInput = document.getElementById('station-search');
+        const suggestionsList = document.getElementById('suggestions-list');
+        const useGpsBtn = document.getElementById('use-gps-btn');
+        let stations = [];
+        let debounceTimer;
+
+        async function loadStations() {
+            try {
+                const res = await fetch('data/DE_stations.json');
+                const data = await res.json();
+                stations = data.elements || [];
+            } catch (e) { console.warn('Stations load failed', e); }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.trim().toLowerCase();
+            clearTimeout(debounceTimer);
+            
+            if (term.length < 2) {
+                suggestionsList.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                const stationResults = stations
+                    .filter(s => 
+                        (s.tags.name && s.tags.name.toLowerCase().includes(term)) ||
+                        (s.tags['railway:ref'] && s.tags['railway:ref'].toLowerCase().includes(term))
+                    )
+                    .slice(0, 5)
+                    .map(s => ({
+                        name: s.tags.name,
+                        desc: `Bahnhof (${s.tags['railway:ref'] || '?'})`,
+                        lat: s.lat,
+                        lon: s.lon,
+                    }));
+                renderSuggestions(stationResults);
+            }, 300);
+        });
+
+        function renderSuggestions(results) {
+            suggestionsList.innerHTML = '';
+            if (results.length === 0) {
+                suggestionsList.innerHTML = '<div class="autocomplete-item" style="text-align:center; opacity:0.6;">Nichts gefunden</div>';
+            } else {
+                results.forEach(res => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<strong>${res.name}</strong><br><small style="opacity:0.7;">${res.desc}</small>`;
+                    div.onclick = () => selectLocation(res);
+                    suggestionsList.appendChild(div);
+                });
+            }
+            suggestionsList.style.display = 'block';
+        }
+
+        function selectLocation(loc) {
+            searchInput.value = '';
+            suggestionsList.style.display = 'none';
+            document.getElementById('location-title').textContent = `Sonnenstand für ${loc.name}`;
+            updateSunWidget(loc.lat, loc.lon);
+        }
+
+        useGpsBtn.addEventListener('click', () => {
+            document.getElementById('location-title').textContent = 'Sonnenstand (Mein Standort)';
+            if (window.rxGetPosition) window.rxGetPosition().then(pos => updateSunWidget(pos.coords.latitude, pos.coords.longitude));
+            else navigator.geolocation.getCurrentPosition(pos => updateSunWidget(pos.coords.latitude, pos.coords.longitude));
+        });
+
+        // --- Initial Load ---
+        loadStations();
         if (window.rxGetPosition) {
-            window.rxGetPosition().then(pos => updateSunWidget(pos.coords.latitude, pos.coords.longitude));
+            window.rxGetPosition().then(pos => {
+                document.getElementById('location-title').textContent = 'Sonnenstand (Mein Standort)';
+                updateSunWidget(pos.coords.latitude, pos.coords.longitude);
+            });
         } else {
-            navigator.geolocation.getCurrentPosition(pos => updateSunWidget(pos.coords.latitude, pos.coords.longitude));
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('location-title').textContent = 'Sonnenstand (Mein Standort)';
+                updateSunWidget(pos.coords.latitude, pos.coords.longitude);
+            });
         }
     </script>
 </body>
